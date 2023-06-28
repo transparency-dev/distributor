@@ -25,11 +25,10 @@ import (
 	"os"
 
 	"github.com/golang/glog"
-	"github.com/google/trillian-examples/distributor/cmd/internal/distributor"
-	ihttp "github.com/google/trillian-examples/distributor/cmd/internal/http"
-	i_note "github.com/google/trillian-examples/internal/note"
-	"github.com/google/trillian-examples/serverless/config"
 	"github.com/gorilla/mux"
+	"github.com/transparency-dev/distributor/cmd/internal/distributor"
+	ihttp "github.com/transparency-dev/distributor/cmd/internal/http"
+	i_note "github.com/transparency-dev/distributor/internal/note"
 	"golang.org/x/mod/sumdb/note"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v2"
@@ -79,12 +78,12 @@ func main() {
 		ws[wSigV.Name()] = wSigV
 	}
 
-	logCfg := logConfig{}
-	if err := yaml.Unmarshal(configLogs, &logCfg); err != nil {
+	logsCfg := logsConfig{}
+	if err := yaml.Unmarshal(configLogs, &logsCfg); err != nil {
 		glog.Exitf("Failed to unmarshal log config: %v", err)
 	}
-	ls := make(map[string]distributor.LogInfo, len(logCfg.Logs))
-	for _, l := range logCfg.Logs {
+	ls := make(map[string]distributor.LogInfo, len(logsCfg.Logs))
+	for _, l := range logsCfg.Logs {
 		lSigV, err := i_note.NewVerifier(l.PublicKeyType, l.PublicKey)
 		if err != nil {
 			glog.Exitf("Invalid log public key: %v", err)
@@ -130,10 +129,29 @@ func main() {
 	}
 }
 
-// logConfig contains all of the metadata for the logs.
-type logConfig struct {
+// logsConfig contains all of the metadata for the logs.
+type logsConfig struct {
 	// Log defines the log checkpoints are being distributed for.
-	Logs []config.Log `yaml:"Logs"`
+	Logs []logConfig `yaml:"Logs"`
+}
+
+// Log describes a verifiable log in a config file.
+type logConfig struct {
+	// ID is used to refer to the log in directory paths.
+	// This field should not be manually set in configs, instead it will be
+	// derived automatically by logfmt.ID.
+	ID string `yaml:"ID"`
+	// PublicKey used to verify checkpoints from this log.
+	PublicKey string `yaml:"PublicKey"`
+	// PublicKeyType identifies the format of the key present in the PublicKey field.
+	// If unset, the key should be assumed to be in a format which `note.NewVerifier`
+	// understands.
+	PublicKeyType string `yaml:"PublicKeyType"`
+	// Origin is the expected first line of checkpoints from the log.
+	Origin string `yaml:"Origin"`
+	// URL is the URL of the root of the log.
+	// This is optional if direct log communication is not required.
+	URL string `yaml:"URL"`
 }
 
 // witnessConfig contains all of the witness public keys.

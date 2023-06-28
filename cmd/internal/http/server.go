@@ -24,7 +24,7 @@ import (
 	"strconv"
 
 	"github.com/golang/glog"
-	"github.com/google/trillian-examples/distributor/api"
+	"github.com/transparency-dev/distributor/api"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

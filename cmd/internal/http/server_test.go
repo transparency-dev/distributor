@@ -14,7 +14,7 @@
 
 package http_test
 
-//go:generate mockgen -write_package_comment=false -self_package github.com/google/trillian-examples/distributor/cmd/internal/http_test -package http_test -destination mock_distributor_test.go  github.com/google/trillian-examples/distributor/cmd/internal/http Distributor
+//go:generate mockgen -write_package_comment=false -self_package github.com/transparency-dev/distributor/cmd/internal/http_test -package http_test -destination mock_distributor_test.go  github.com/transparency-dev/distributor/cmd/internal/http Distributor
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/trillian-examples/distributor/cmd/internal/http"
+	"github.com/transparency-dev/distributor/cmd/internal/http"
 	"github.com/gorilla/mux"
 
 	_ "github.com/mattn/go-sqlite3" // Load drivers for sqlite3

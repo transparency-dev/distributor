@@ -25,7 +25,7 @@ import (
 	"sort"
 
 	"github.com/golang/glog"
-	"github.com/google/trillian-examples/formats/checkpoints"
+	"github.com/transparency-dev/distributor/internal/checkpoints"
 	"github.com/transparency-dev/formats/log"
 	"golang.org/x/mod/sumdb/note"
 	"google.golang.org/grpc/codes"
