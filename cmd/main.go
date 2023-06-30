@@ -31,7 +31,7 @@ import (
 	i_note "github.com/transparency-dev/distributor/internal/note"
 	"golang.org/x/mod/sumdb/note"
 	"golang.org/x/sync/errgroup"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 
 	_ "embed"
 
