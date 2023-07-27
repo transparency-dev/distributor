@@ -19,8 +19,8 @@ services:
 
   distributor:
     build:
-      context: ..
-      dockerfile: ./distributor/cmd/Dockerfile
+      context: .
+      dockerfile: ./cmd/Dockerfile
     command: [
       "--alsologtostderr",
       "--v=2",

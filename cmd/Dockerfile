@@ -15,7 +15,7 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN go build -o bin/distributor ./distributor/cmd
+RUN go build -o bin/distributor ./cmd
 
 # Build release image
 FROM alpine:3.17.3
