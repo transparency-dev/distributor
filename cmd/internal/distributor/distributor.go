@@ -125,6 +125,8 @@ func (d *Distributor) GetCheckpointN(ctx context.Context, logID string, n uint32
 	if len(cpsAtSize) >= int(n) {
 		cp, err := checkpoints.Combine(cpsAtSize, l.Verifier, note.VerifierList(witsAtSize...))
 		if err != nil {
+			// TODO(mhutchinson): Keep trying to find some checkpoints that can be merged
+			// but remember to double check we have enough sigs before returning.
 			return nil, fmt.Errorf("failed to combine sigs: %v", err)
 		}
 		return cp, nil
