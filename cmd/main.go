@@ -29,6 +29,7 @@ import (
 	"github.com/transparency-dev/distributor/cmd/internal/distributor"
 	ihttp "github.com/transparency-dev/distributor/cmd/internal/http"
 	i_note "github.com/transparency-dev/distributor/internal/note"
+	"github.com/transparency-dev/formats/log"
 	"golang.org/x/mod/sumdb/note"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
@@ -88,10 +89,12 @@ func main() {
 		if err != nil {
 			glog.Exitf("Invalid log public key: %v", err)
 		}
+		l.ID = log.ID(l.Origin)
 		ls[l.ID] = distributor.LogInfo{
 			Origin:   l.Origin,
 			Verifier: lSigV,
 		}
+		glog.Infof("Added log %q (%s)", l.Origin, l.ID)
 	}
 	if len(*mysqlURI) == 0 {
 		glog.Exitf("mysql_uri is required")
