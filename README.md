@@ -1,7 +1,9 @@
 # Distributor
 
-[![Slack
-Status](https://img.shields.io/badge/Slack-Chat-blue.svg)](https://gtrillian.slack.com/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/transparency-dev/distributor.svg)](https://pkg.go.dev/github.com/transparency-dev/distributor)
+[![Go Report Card](https://goreportcard.com/badge/github.com/transparency-dev/distributor)](https://goreportcard.com/report/github.com/transparency-dev/distributor)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/transparency-dev/distributor/badge)](https://securityscorecards.dev/viewer/?uri=github.com/transparency-dev/distributor)
+[![Slack Status](https://img.shields.io/badge/Slack-Chat-blue.svg)](https://gtrillian.slack.com/)
 
 ## Overview
 
