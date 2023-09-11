@@ -116,9 +116,9 @@ func TestMain(m *testing.M) {
 	// pulls an image, creates a container based on it and runs it
 	resource, err := pool.RunWithOptions(
 		&dockertest.RunOptions{
-			Repository: "mariadb",
-			Tag:        "10.11.2",
-			Env:        []string{"MARIADB_ROOT_PASSWORD=secret"},
+			Repository: "mysql",
+			Tag:        "8.0",
+			Env:        []string{"MYSQL_ROOT_PASSWORD=secret"},
 		},
 		docktest.ConfigureHost)
 	if err != nil {
