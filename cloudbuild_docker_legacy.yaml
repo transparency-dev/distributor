@@ -1,0 +1,47 @@
+# This cloudbuild script builds docker images we expect users to
+# commonly deploy, and stores these in Google Container Registry.
+# This is denoted legacy because this is being migrated to Artifact Registry.
+# This builds the images multi-arch so they run on x64 and Raspberry Pi.
+timeout: 3600s
+options:
+  machineType: E2_HIGHCPU_32
+  volumes:
+  - name: go-modules
+    path: /go
+  env:
+  - GOPROXY=https://proxy.golang.org
+  - PROJECT_ROOT=github.com/transparency-dev/distributor
+  - GOPATH=/go
+  - 'DOCKER_CLI_EXPERIMENTAL=enabled'
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['run', '--privileged', 'linuxkit/binfmt:v0.8']
+    id: 'initialize-qemu'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['buildx', 'create', '--name', 'mybuilder']
+    id: 'create-builder'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['buildx', 'use', 'mybuilder']
+    id: 'select-builder'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['buildx', 'inspect', '--bootstrap']
+    id: 'show-target-build-platforms'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'buildx',
+      'build',
+      '--platform', '$_DOCKER_BUILDX_PLATFORMS',
+      '-t', 'gcr.io/trillian-opensource-ci/distributor:latest',
+      '--cache-from', 'gcr.io/trillian-opensource-ci/distributor:latest',
+      '-f', './cmd/Dockerfile',
+      '--push',
+      '.'
+    ]
+    waitFor:
+      - show-target-build-platforms
+    id: 'build-distributor-image'
+
+substitutions:
+  _DOCKER_BUILDX_PLATFORMS: 'linux/amd64,linux/arm/v7'
