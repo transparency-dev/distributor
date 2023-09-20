@@ -48,15 +48,27 @@ var (
 	// configLogs is the config for the logs this distributor will accept.
 	//go:embed logs.yaml
 	configLogs []byte
+
+	// defaultWitnesses is the witness config that will be used if witness_config_file flag is not provided.
+	//go:embed witnesses.yaml
+	defaultWitnesses []byte
 )
 
 func main() {
 	flag.Parse()
 	ctx := context.Background()
 
-	configWitnesses, err := os.ReadFile(*witnessConfigFile)
-	if err != nil {
-		glog.Exitf("Failed to read witness_config_file (%q): %v", *witnessConfigFile, err)
+	var configWitnesses []byte
+	if len(*witnessConfigFile) == 0 {
+		glog.Info("Flag witness_config_file not specified; default witness list will be used")
+		configWitnesses = defaultWitnesses
+	} else {
+		var err error
+		configWitnesses, err = os.ReadFile(*witnessConfigFile)
+		if err != nil {
+			glog.Exitf("Failed to read witness_config_file (%q): %v", *witnessConfigFile, err)
+		}
+		glog.Info("Witness list read from %v", *witnessConfigFile)
 	}
 	// This error group will be used to run all top level processes.
 	// If any process dies, then all of them will be stopped via context cancellation.

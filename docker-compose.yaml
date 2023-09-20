@@ -35,4 +35,4 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./witnesses.yaml:/var/config/witnesses.yaml
+      - ./cmd/witnesses.yaml:/var/config/witnesses.yaml
