@@ -20,10 +20,12 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
 
+	"cloud.google.com/go/cloudsqlconn"
 	"github.com/golang/glog"
 	"github.com/gorilla/mux"
 	"github.com/transparency-dev/distributor/cmd/internal/distributor"
@@ -36,12 +38,14 @@ import (
 
 	_ "embed"
 
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	addr     = flag.String("listen", ":8080", "Address to listen on")
-	mysqlURI = flag.String("mysql_uri", "", "URI for MySQL DB")
+	addr        = flag.String("listen", ":8080", "Address to listen on")
+	useCloudSql = flag.Bool("use_cloud_sql", false, "Set to true to set up the DB connection using cloudsql connection. This will ignore mysql_uri and generate it from env variables.")
+	mysqlURI    = flag.String("mysql_uri", "", "URI for MySQL DB")
 
 	witnessConfigFile = flag.String("witness_config_file", "", "Path to a file containing the public keys of allowed witnesses")
 
@@ -65,15 +69,7 @@ func main() {
 
 	ws := getWitnessesOrDie()
 	ls := getLogsOrDie()
-
-	if len(*mysqlURI) == 0 {
-		glog.Exitf("mysql_uri is required")
-	}
-	glog.Infof("Connecting to DB at %q", *mysqlURI)
-	db, err := sql.Open("mysql", *mysqlURI)
-	if err != nil {
-		glog.Exitf("Failed to connect to DB: %v", err)
-	}
+	db := getDatabaseOrDie()
 
 	d, err := distributor.NewDistributor(ws, ls, db)
 	if err != nil {
@@ -104,6 +100,55 @@ func main() {
 	if err := g.Wait(); err != nil {
 		glog.Errorf("failed with error: %v", err)
 	}
+}
+
+func getDatabaseOrDie() *sql.DB {
+	if *useCloudSql {
+		return getCloudSqlOrDie()
+	}
+	if len(*mysqlURI) == 0 {
+		glog.Exitf("mysql_uri is required")
+	}
+	glog.Infof("Connecting to DB at %q", *mysqlURI)
+	db, err := sql.Open("mysql", *mysqlURI)
+	if err != nil {
+		glog.Exitf("Failed to connect to DB: %v", err)
+	}
+	return db
+}
+
+func getCloudSqlOrDie() *sql.DB {
+	mustGetenv := func(k string) string {
+		v := os.Getenv(k)
+		if v == "" {
+			glog.Exitf("Failed precondition: %s environment variable not set.", k)
+		}
+		return v
+	}
+	var (
+		dbUser                 = mustGetenv("DB_USER")                  // e.g. 'my-db-user'
+		dbPwd                  = mustGetenv("DB_PASS")                  // e.g. 'my-db-password'
+		dbName                 = mustGetenv("DB_NAME")                  // e.g. 'my-database'
+		instanceConnectionName = mustGetenv("INSTANCE_CONNECTION_NAME") // e.g. 'project:region:instance'
+	)
+
+	d, err := cloudsqlconn.NewDialer(context.Background())
+	if err != nil {
+		glog.Exitf("cloudsqlconn.NewDialer: %w", err)
+	}
+	var opts []cloudsqlconn.DialOption
+	mysql.RegisterDialContext("cloudsqlconn",
+		func(ctx context.Context, addr string) (net.Conn, error) {
+			return d.Dial(ctx, instanceConnectionName, opts...)
+		})
+
+	dbURI := fmt.Sprintf("%s:%s@cloudsqlconn(localhost:3306)/%s", dbUser, dbPwd, dbName)
+
+	dbPool, err := sql.Open("mysql", dbURI)
+	if err != nil {
+		glog.Exitf("sql.Open: %w", err)
+	}
+	return dbPool
 }
 
 func getLogsOrDie() map[string]distributor.LogInfo {
