@@ -48,54 +48,24 @@ var (
 	// configLogs is the config for the logs this distributor will accept.
 	//go:embed logs.yaml
 	configLogs []byte
+
+	// defaultWitnesses is the witness config that will be used if witness_config_file flag is not provided.
+	//go:embed witnesses.yaml
+	defaultWitnesses []byte
 )
 
 func main() {
 	flag.Parse()
 	ctx := context.Background()
 
-	configWitnesses, err := os.ReadFile(*witnessConfigFile)
-	if err != nil {
-		glog.Exitf("Failed to read witness_config_file (%q): %v", *witnessConfigFile, err)
-	}
-	// This error group will be used to run all top level processes.
-	// If any process dies, then all of them will be stopped via context cancellation.
-	g, ctx := errgroup.WithContext(ctx)
 	httpListener, err := net.Listen("tcp", *addr)
 	if err != nil {
 		glog.Exitf("Failed to listen on %q", *addr)
 	}
 
-	witCfg := witnessConfig{}
-	if err := yaml.Unmarshal(configWitnesses, &witCfg); err != nil {
-		glog.Exitf("Failed to unmarshal witness config: %v", err)
-	}
-	ws := make(map[string]note.Verifier, len(witCfg.Witnesses))
-	for _, w := range witCfg.Witnesses {
-		wSigV, err := note.NewVerifier(w)
-		if err != nil {
-			glog.Exitf("Invalid witness public key: %v", err)
-		}
-		ws[wSigV.Name()] = wSigV
-	}
+	ws := getWitnessesOrDie()
+	ls := getLogsOrDie()
 
-	logsCfg := logsConfig{}
-	if err := yaml.Unmarshal(configLogs, &logsCfg); err != nil {
-		glog.Exitf("Failed to unmarshal log config: %v", err)
-	}
-	ls := make(map[string]distributor.LogInfo, len(logsCfg.Logs))
-	for _, l := range logsCfg.Logs {
-		lSigV, err := i_note.NewVerifier(l.PublicKeyType, l.PublicKey)
-		if err != nil {
-			glog.Exitf("Invalid log public key: %v", err)
-		}
-		l.ID = log.ID(l.Origin)
-		ls[l.ID] = distributor.LogInfo{
-			Origin:   l.Origin,
-			Verifier: lSigV,
-		}
-		glog.Infof("Added log %q (%s)", l.Origin, l.ID)
-	}
 	if len(*mysqlURI) == 0 {
 		glog.Exitf("mysql_uri is required")
 	}
@@ -115,6 +85,10 @@ func main() {
 	srv := http.Server{
 		Handler: r,
 	}
+
+	// This error group will be used to run all top level processes.
+	// If any process dies, then all of them will be stopped via context cancellation.
+	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		glog.Info("HTTP server goroutine started")
 		defer glog.Info("HTTP server goroutine done")
@@ -130,6 +104,57 @@ func main() {
 	if err := g.Wait(); err != nil {
 		glog.Errorf("failed with error: %v", err)
 	}
+}
+
+func getLogsOrDie() map[string]distributor.LogInfo {
+	logsCfg := logsConfig{}
+	if err := yaml.Unmarshal(configLogs, &logsCfg); err != nil {
+		glog.Exitf("Failed to unmarshal log config: %v", err)
+	}
+	ls := make(map[string]distributor.LogInfo, len(logsCfg.Logs))
+	for _, l := range logsCfg.Logs {
+		lSigV, err := i_note.NewVerifier(l.PublicKeyType, l.PublicKey)
+		if err != nil {
+			glog.Exitf("Invalid log public key: %v", err)
+		}
+		l.ID = log.ID(l.Origin)
+		ls[l.ID] = distributor.LogInfo{
+			Origin:   l.Origin,
+			Verifier: lSigV,
+		}
+		glog.Infof("Added log %q (%s)", l.Origin, l.ID)
+	}
+	return ls
+}
+
+func getWitnessesOrDie() map[string]note.Verifier {
+	var configWitnesses []byte
+	if len(*witnessConfigFile) == 0 {
+		glog.Info("Flag witness_config_file not specified; default witness list will be used")
+		configWitnesses = defaultWitnesses
+	} else {
+		var err error
+		configWitnesses, err = os.ReadFile(*witnessConfigFile)
+		if err != nil {
+			glog.Exitf("Failed to read witness_config_file (%q): %v", *witnessConfigFile, err)
+		}
+		glog.Info("Witness list read from %v", *witnessConfigFile)
+	}
+
+	witCfg := witnessConfig{}
+	if err := yaml.Unmarshal(configWitnesses, &witCfg); err != nil {
+		glog.Exitf("Failed to unmarshal witness config: %v", err)
+	}
+	ws := make(map[string]note.Verifier, len(witCfg.Witnesses))
+	for _, w := range witCfg.Witnesses {
+		wSigV, err := note.NewVerifier(w)
+		if err != nil {
+			glog.Exitf("Invalid witness public key: %v", err)
+		}
+		ws[wSigV.Name()] = wSigV
+	}
+
+	return ws
 }
 
 // logsConfig contains all of the metadata for the logs.
