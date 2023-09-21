@@ -1,0 +1,2 @@
+/deployment/.terraform
+/deployment/*.tfstate.backup
