@@ -3,6 +3,7 @@ module github.com/transparency-dev/distributor
 go 1.20
 
 require (
+	cloud.google.com/go/cloudsqlconn v1.4.4
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang/glog v1.1.2
@@ -12,14 +13,13 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/transparency-dev/formats v0.0.0-20230619083159-fea486e0b437
-	golang.org/x/mod v0.12.0
+	golang.org/x/mod v0.13.0
 	golang.org/x/sync v0.3.0
 	google.golang.org/grpc v1.58.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.4.4 // indirect
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -57,7 +57,7 @@ require (
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	golang.org/x/tools v0.8.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/api v0.140.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230911183012-2d3300fd4832 // indirect
