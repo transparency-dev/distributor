@@ -8,7 +8,7 @@ updates:
 - package-ecosystem: gomod
   directory: "/"
   groups:
-    all:
+    all-go-deps:
       patterns:
         - "*"
   schedule:
@@ -17,7 +17,7 @@ updates:
 - package-ecosystem: "github-actions"
   directory: "/"
   groups:
-    all:
+    all-gha-deps:
       patterns:
         - "*"
   schedule:
