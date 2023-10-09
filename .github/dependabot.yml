@@ -14,6 +14,9 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+  commit-message:
+    prefix: ":seedling:"
+    include: "scope"
 - package-ecosystem: "github-actions"
   directory: "/"
   groups:
@@ -22,3 +25,6 @@ updates:
         - "*"
   schedule:
     interval: "weekly"
+  commit-message:
+    prefix: ":seedling:"
+    include: "scope"
