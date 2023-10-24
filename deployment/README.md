@@ -1,9 +1,14 @@
 # Distributor GCP Deployment
 
 This terraform script configures a GCP project with a running distributor.
-When authenticated (via `gcloud`) as a principple with sufficient ACLs for
-the project, terraforming the project can be done with:
 
+First authenticate via `gcloud` as a principle with sufficient ACLs for
+the project:
+```bash
+gcloud auth application-default login
+```
+
+Terraforming the project can be done with:
 ```bash
 # Check that the project and region are right and edit if not!
 cat terraform.tfvars
