@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-output "mysql_uri" {
-  description = "The URI of the created resource"
-  value       = google_sql_database_instance.default.self_link
-}
-
 output "mysql_conn" {
   description = "The connection name of the master instance to be used in connection strings"
-  value       = google_sql_database_instance.default.connection_name
+  value       = module.safer-mysql-db.instance_connection_name
 }
 
 output "distributor_uri" {

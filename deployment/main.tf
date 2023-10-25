@@ -45,42 +45,9 @@ resource "google_project_service" "cloudrun_api" {
 ### Create secrets
 ###
 
-## DB root password
-resource "random_password" "db_root_pwd" {
-  length  = 16
-  special = false
-}
-resource "google_secret_manager_secret" "db_root_pass" {
-  secret_id = "dbrootpasssecret"
-  replication {
-    auto {}
-  }
-  depends_on = [google_project_service.secretmanager_api]
-}
-resource "google_secret_manager_secret_version" "db_root_pass_data" {
-  secret      = google_secret_manager_secret.db_root_pass.id
-  secret_data = random_password.db_root_pwd.result
-}
-
-# DB user name
-locals {
-  dbuser = "distributor-app"
-}
-resource "google_secret_manager_secret" "dbuser" {
-  secret_id = "dbusersecret"
-  replication {
-    auto {}
-  }
-  depends_on = [google_project_service.secretmanager_api]
-}
-resource "google_secret_manager_secret_version" "dbuser_data" {
-  secret = google_secret_manager_secret.dbuser.id
-  secret_data = local.dbuser
-}
-
 # DB user password
 resource "random_password" "db_user_pwd" {
-  length  = 16
+  length  = 32
   special = false
 }
 resource "google_secret_manager_secret" "dbpass" {
@@ -94,68 +61,79 @@ resource "google_secret_manager_secret_version" "dbpass_data" {
   secret      = google_secret_manager_secret.dbpass.id
   secret_data = random_password.db_user_pwd.result
 }
-
-# Database name
-resource "google_secret_manager_secret" "dbname" {
-  secret_id = "dbnamesecret"
-  replication {
-    auto {}
-  }
-  depends_on = [google_project_service.secretmanager_api]
-}
-resource "google_secret_manager_secret_version" "dbname_data" {
-  secret      = google_secret_manager_secret.dbname.id
-  secret_data = "distributor"
-}
-
-###
-### Update service accounts to allow secret access
-###
-resource "google_secret_manager_secret_iam_member" "secretaccess_compute_dbname" {
-  secret_id = google_secret_manager_secret.dbname.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com" # Project's compute service account
-}
-resource "google_secret_manager_secret_iam_member" "secretaccess_compute_dbuser" {
-  secret_id = google_secret_manager_secret.dbuser.id
-  role      = "roles/secretmanager.secretAccessor"
-  member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com" # Project's compute service account
-}
+# Update service accounts to allow secret access
 resource "google_secret_manager_secret_iam_member" "secretaccess_compute_dbpass" {
   secret_id = google_secret_manager_secret.dbpass.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com" # Project's compute service account
 }
 
-###
-### Creates SQL instance (~15 minutes to fully spin up)
-###
-resource "google_sql_database_instance" "default" {
-  name             = "distributor-mysql-instance-1"
-  project          = var.project_id
-  region           = var.region
-  database_version = "MYSQL_8_0"
-  root_password    = random_password.db_root_pwd.result
+resource "random_id" "suffix" {
+  byte_length = 5
+}
 
-  settings {
-    tier = "db-f1-micro"
-  }
-  # set `deletion_protection` to true, will ensure that one cannot accidentally delete this instance by
-  # use of Terraform whereas `deletion_protection_enabled` flag protects this instance at the GCP level.
+locals {
+  /*
+    Random instance name needed because:
+    "You cannot reuse an instance name for up to a week after you have deleted an instance."
+    See https://cloud.google.com/sql/docs/mysql/delete-instance for details.
+  */
+  network_name = "${var.network_name}-safer-${random_id.suffix.hex}"
+}
+
+###
+### Networking
+###
+module "network-safer-mysql-simple" {
+  source  = "terraform-google-modules/network/google"
+  version = "7.4.0"
+
+  project_id   = var.project_id
+  network_name = local.network_name
+
+  subnets = [
+  ]
+}
+
+module "private-service-access" {
+  source      = "GoogleCloudPlatform/sql-db/google//modules/private_service_access"
+  project_id  = var.project_id
+  vpc_network = module.network-safer-mysql-simple.network_name
+}
+
+locals {
+  dbname = "distributor"
+  dbuser = "distributor-app"
+}
+
+module "safer-mysql-db" {
+  source               = "GoogleCloudPlatform/sql-db/google//modules/safer_mysql"
+  name                 = "distributor-mysql-instance-1"
+  random_instance_name = true
+  project_id           = var.project_id
+
   deletion_protection = false
-  depends_on          = [google_project_service.sqladmin_api]
-}
 
-resource "google_sql_database" "distributordb" {
-  name     = "distributor"
-  instance = google_sql_database_instance.default.name
-  charset  = "utf8"
-}
+  database_version = "MYSQL_8_0"
+  region           = var.region
+  zone             = "${var.region}-c"
+  tier             = "db-n1-standard-1"
+  assign_public_ip = "true"
+  vpc_network      = module.network-safer-mysql-simple.network_self_link
 
-resource "google_sql_user" "db_user" {
-  name     = local.dbuser
-  instance = google_sql_database_instance.default.name
-  password = random_password.db_user_pwd.result
+  user_name = local.dbuser
+  user_password = random_password.db_user_pwd.result
+
+  additional_databases = [
+    {
+      name      = local.dbname,
+      charset   = "",
+      collation = "",
+    },
+  ]
+
+  // Optional: used to enforce ordering in the creation of resources.
+  module_depends_on = [module.private-service-access.peering_completed]
 }
 
 ###
@@ -164,26 +142,24 @@ resource "google_sql_user" "db_user" {
 resource "google_cloud_run_v2_service" "default" {
   name     = "distributor-service"
   location = "us-central1"
+  launch_stage = "BETA"
 
   template {
     containers {
       image = "gcr.io/trillian-opensource-ci/distributor:latest" # Image to deploy
       args  = [ "--use_cloud_sql" ]
 
-      # Sets a environment variable for instance connection name
       env {
         name  = "INSTANCE_CONNECTION_NAME"
-        value = google_sql_database_instance.default.connection_name
+        value = module.safer-mysql-db.instance_connection_name
       }
-      # Sets a secret environment variable for database user secret
+      env {
+        name = "DB_NAME"
+        value = local.dbname
+      }
       env {
         name = "DB_USER"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.dbuser.secret_id # secret name
-            version = "latest"                                      # secret version number or 'latest'
-          }
-        }
+        value = local.dbuser
       }
       # Sets a secret environment variable for database password secret
       env {
@@ -191,16 +167,6 @@ resource "google_cloud_run_v2_service" "default" {
         value_source {
           secret_key_ref {
             secret  = google_secret_manager_secret.dbpass.secret_id # secret name
-            version = "latest"                                      # secret version number or 'latest'
-          }
-        }
-      }
-      # Sets a secret environment variable for database name secret
-      env {
-        name = "DB_NAME"
-        value_source {
-          secret_key_ref {
-            secret  = google_secret_manager_secret.dbname.secret_id # secret name
             version = "latest"                                      # secret version number or 'latest'
           }
         }
@@ -214,7 +180,7 @@ resource "google_cloud_run_v2_service" "default" {
     volumes {
       name = "cloudsql"
       cloud_sql_instance {
-        instances = [google_sql_database_instance.default.connection_name]
+        instances = [module.safer-mysql-db.instance_connection_name]
       }
     }
   }
