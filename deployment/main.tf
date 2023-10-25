@@ -146,6 +146,12 @@ resource "google_sql_database_instance" "default" {
   depends_on          = [google_project_service.sqladmin_api]
 }
 
+resource "google_sql_database" "distributordb" {
+  name     = "distributor"
+  instance = google_sql_database_instance.default.name
+  charset  = "utf8"
+}
+
 resource "google_sql_user" "db_user" {
   name     = local.dbuser
   instance = google_sql_database_instance.default.name
