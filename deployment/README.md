@@ -18,10 +18,6 @@ terraform apply
 ```
 
 This should bring up the DB and Distributor running in Cloud Run.
-To create the Database, the easiest thing to do is to find the instance
-within Cloud SQL in GCP UI, and create a database called "distributor".
-
-- [ ] TODO(mhutchinson): Automate the DB creation
 
 After doing that, it's possible to query the distributor using curl:
 
