@@ -22,3 +22,8 @@ variable "region" {
   description = "The region to host the cluster in"
 }
 
+variable "network_name" {
+  default = "mysql-private"
+  type    = string
+}
+
