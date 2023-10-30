@@ -3,7 +3,7 @@ module github.com/transparency-dev/distributor
 go 1.20
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.4.5
+	cloud.google.com/go/cloudsqlconn v1.5.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang/glog v1.1.2
