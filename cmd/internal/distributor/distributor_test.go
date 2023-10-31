@@ -26,9 +26,9 @@ import (
 	"github.com/cenkalti/backoff"
 	"github.com/golang/glog"
 	"github.com/google/go-cmp/cmp"
+	"github.com/ory/dockertest/v3"
 	"github.com/transparency-dev/distributor/cmd/internal/distributor"
 	docktest "github.com/transparency-dev/distributor/internal/testonly/docker"
-	"github.com/ory/dockertest/v3"
 	"github.com/transparency-dev/formats/log"
 	"golang.org/x/mod/sumdb/note"
 	"google.golang.org/grpc/codes"
@@ -239,7 +239,7 @@ func TestDistributeLogAndWitnessMustMatchCheckpoint(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			desc:     "Correct log and witness: foo and whittle",
+			desc:     "Correct log and witness: foo and aardvark",
 			reqLogID: "FooLog",
 			reqWitID: "Aardvark",
 			log:      logFoo,
@@ -247,7 +247,7 @@ func TestDistributeLogAndWitnessMustMatchCheckpoint(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			desc:     "Correct log and witness: bar and wattle",
+			desc:     "Correct log and witness: bar and badger",
 			reqLogID: "BarLog",
 			reqWitID: "Badger",
 			log:      logBar,
@@ -319,7 +319,7 @@ func TestDistributeLogAndWitnessMustMatchCheckpoint(t *testing.T) {
 
 func TestDistributeEvolution(t *testing.T) {
 	// The base case for this test is that a single checkpoint has already
-	// been registered for log foo, by whittle, at tree size 16, with root hash H("16").
+	// been registered for log foo, by aardvark, at tree size 16, with root hash H("16").
 	ws := map[string]note.Verifier{
 		"Aardvark": witAardvark.verifier,
 		"Badger":   witBadger.verifier,
@@ -337,7 +337,7 @@ func TestDistributeEvolution(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			desc:     "whittle a bit bigger",
+			desc:     "aardvark a bit bigger",
 			log:      logFoo,
 			wit:      witAardvark,
 			size:     18,
@@ -345,7 +345,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			desc:     "whittle smaller",
+			desc:     "aardvark smaller",
 			log:      logFoo,
 			wit:      witAardvark,
 			size:     11,
@@ -353,7 +353,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			desc:     "whittle same",
+			desc:     "aardvark same",
 			log:      logFoo,
 			wit:      witAardvark,
 			size:     16,
@@ -361,7 +361,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			desc:     "whittle same size but different hash",
+			desc:     "aardvark same size but different hash",
 			log:      logFoo,
 			wit:      witAardvark,
 			size:     16,
@@ -369,7 +369,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			desc:     "whittle smaller different log",
+			desc:     "aardvark smaller different log",
 			log:      logBar,
 			wit:      witAardvark,
 			size:     11,
@@ -377,7 +377,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			desc:     "wattle smaller",
+			desc:     "badger smaller",
 			log:      logFoo,
 			wit:      witBadger,
 			size:     11,
@@ -385,7 +385,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			desc:     "wattle same size",
+			desc:     "badger same size",
 			log:      logFoo,
 			wit:      witBadger,
 			size:     16,
@@ -393,7 +393,7 @@ func TestDistributeEvolution(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			desc:     "wattle same size but different hash",
+			desc:     "badger same size but different hash",
 			log:      logFoo,
 			wit:      witBadger,
 			size:     16,
@@ -428,7 +428,7 @@ func TestDistributeEvolution(t *testing.T) {
 
 func TestGetCheckpointWitness(t *testing.T) {
 	// The base case for this test is that a single checkpoint has already
-	// been registered for log foo, by whittle, at tree size 16, with root hash H("16").
+	// been registered for log foo, by aardvark, at tree size 16, with root hash H("16").
 	ws := map[string]note.Verifier{
 		"Aardvark": witAardvark.verifier,
 		"Badger":   witBadger.verifier,
@@ -501,8 +501,8 @@ func TestGetCheckpointWitness(t *testing.T) {
 
 func TestGetCheckpointN(t *testing.T) {
 	// The base case for this test is that 2 checkpoints have already been written:
-	//  - whittle, at tree size 16
-	//  - waffle, at tree size 14
+	//  - aardvark, at tree size 16
+	//  - chameleon, at tree size 14
 	ws := map[string]note.Verifier{
 		"Aardvark":  witAardvark.verifier,
 		"Badger":    witBadger.verifier,
