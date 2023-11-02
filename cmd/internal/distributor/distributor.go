@@ -79,8 +79,7 @@ func (d *Distributor) GetCheckpointN(ctx context.Context, logID string, n uint32
 	if n == 0 || n > maxSigs {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid N %d", n)
 	}
-	_, ok := d.ls[logID]
-	if !ok {
+	if _, ok := d.ls[logID]; !ok {
 		return nil, status.Errorf(codes.InvalidArgument, "unknown log ID %q", logID)
 	}
 
@@ -169,8 +168,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 	// this witness. We should now store this, and then attempt to merge with other checkpoints for the same
 	// log size to create the checkpoint.N files.
 
-	_, err = tx.ExecContext(ctx, `REPLACE INTO checkpoints_by_witness (logID, witID, treeSize, chkpt) VALUES (?, ?, ?, ?)`, logID, witID, newCP.Size, nextRaw)
-	if err != nil {
+	if _, err := tx.ExecContext(ctx, `REPLACE INTO checkpoints_by_witness (logID, witID, treeSize, chkpt) VALUES (?, ?, ?, ?)`, logID, witID, newCP.Size, nextRaw); err != nil {
 		return fmt.Errorf("ExecContext(): %v", err)
 	}
 
@@ -201,7 +199,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 		return fmt.Errorf("rows.Err(): %v", err)
 	}
 
-	var sigCount = len(witnesses)
+	sigCount := len(witnesses)
 	row := tx.QueryRowContext(ctx, "SELECT treeSize FROM merged_checkpoints WHERE logID = ? AND sigCount = ?", logID, sigCount)
 	if row.Err() != nil {
 		return fmt.Errorf("QueryRowContext(): %v", err)
