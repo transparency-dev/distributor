@@ -579,17 +579,6 @@ func TestGetCheckpointN(t *testing.T) {
 			wantWits: []note.Verifier{witBadger.verifier, witChameleon.verifier},
 		},
 		{
-			desc:     "more sigs can be returned than needed",
-			distWit:  witBadger,
-			distLog:  logFoo,
-			distSize: 16,
-			reqLog:   "FooLog",
-			reqN:     1,
-			wantErr:  false,
-			wantSize: 16,
-			wantWits: []note.Verifier{witBadger.verifier, witAardvark.verifier},
-		},
-		{
 			desc:        "error returned if not enough sigs",
 			distWit:     witBadger,
 			distLog:     logFoo,
@@ -725,12 +714,9 @@ func TestGetCheckpointNHistoric(t *testing.T) {
 					22,
 				},
 			},
-			reqN:        2,
-			wantErr:     true,
-			wantErrCode: codes.NotFound,
-			// TODO(mhutchinson): this case should work with the following assertions
-			// wantErr: false,
-			// wantSize: 10,
+			reqN:     2,
+			wantErr:  false,
+			wantSize: 10,
 		},
 		{
 			desc: "TODO: N=2 can get historic version where both have been seen but not at same time",
