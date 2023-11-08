@@ -187,3 +187,13 @@ resource "google_cloud_run_v2_service" "default" {
   client     = "terraform"
   depends_on = [google_project_service.secretmanager_api, google_project_service.cloudrun_api, google_project_service.sqladmin_api]
 }
+
+resource "google_cloud_run_service_iam_binding" "default" {
+  location = google_cloud_run_v2_service.default.location
+  service  = google_cloud_run_v2_service.default.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
+
