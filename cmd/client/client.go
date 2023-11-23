@@ -44,6 +44,6 @@ func main() {
 			glog.Warningf("Could not get checkpoint.%d for log %s: %v", *n, l, err)
 			continue
 		}
-		fmt.Printf("Checkpoint.%d for log %s:\n'''\n%s\n'''\n\n", *n, l, cp)
+		fmt.Printf("Checkpoint.%d for log %s:\n\n%s\n\n", *n, l, cp)
 	}
 }
