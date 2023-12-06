@@ -121,7 +121,7 @@ module "safer-mysql-db" {
   assign_public_ip = "true"
   vpc_network      = module.network-safer-mysql-simple.network_self_link
 
-  user_name = local.dbuser
+  user_name     = local.dbuser
   user_password = random_password.db_user_pwd.result
 
   additional_databases = [
@@ -140,14 +140,14 @@ module "safer-mysql-db" {
 ### Set up Cloud Run service
 ###
 resource "google_cloud_run_v2_service" "default" {
-  name     = "distributor-service"
-  location = "us-central1"
+  name         = "distributor-service"
+  location     = "us-central1"
   launch_stage = "BETA"
 
   template {
     containers {
       image = "gcr.io/trillian-opensource-ci/distributor:latest" # Image to deploy
-      args  = [ 
+      args = [
         "--logtostderr",
         "--v=1",
         "--use_cloud_sql",
@@ -158,11 +158,11 @@ resource "google_cloud_run_v2_service" "default" {
         value = module.safer-mysql-db.instance_connection_name
       }
       env {
-        name = "DB_NAME"
+        name  = "DB_NAME"
         value = local.dbname
       }
       env {
-        name = "DB_USER"
+        name  = "DB_USER"
         value = local.dbuser
       }
       # Sets a secret environment variable for database password secret
