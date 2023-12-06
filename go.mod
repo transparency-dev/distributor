@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/transparency-dev/formats v0.0.0-20230619083159-fea486e0b437
+	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
 	golang.org/x/mod v0.14.0
 	golang.org/x/sync v0.5.0
 	google.golang.org/grpc v1.59.0

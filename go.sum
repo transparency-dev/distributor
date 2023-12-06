@@ -159,6 +159,8 @@ github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o
 github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
 github.com/transparency-dev/formats v0.0.0-20230619083159-fea486e0b437 h1:URBmePD31wqFRk6JyuH1f4zCxizn86EIe54I0y49Mf0=
 github.com/transparency-dev/formats v0.0.0-20230619083159-fea486e0b437/go.mod h1:n4WaqmAvPXspZADcvhGOLGIp+S/vrikmArFONkfH2rs=
+github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3 h1:Mpx9pqc7bKrx2QQxKL3SPbLIGH4gTBR1ZFrNuKq3CcY=
+github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3/go.mod h1:tY9Z9oBaYdQt4NWIhsFAtv0altwLk+K9Gg/2tbS0eBQ=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/vishvananda/netlink v1.1.0/go.mod h1:cTgwzPIzzgDAYoQrMm0EdrjRUBkTqKYppBueQtXaqoE=
 github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17pCcGlemwknint6hfoeCVQrEMVwxRLRjXpq+BU=
