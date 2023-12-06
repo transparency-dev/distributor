@@ -147,7 +147,11 @@ resource "google_cloud_run_v2_service" "default" {
   template {
     containers {
       image = "gcr.io/trillian-opensource-ci/distributor:latest" # Image to deploy
-      args  = [ "--use_cloud_sql" ]
+      args  = [ 
+        "--logtostderr",
+        "--v=1",
+        "--use_cloud_sql",
+      ]
 
       env {
         name  = "INSTANCE_CONNECTION_NAME"
