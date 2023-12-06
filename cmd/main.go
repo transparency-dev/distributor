@@ -30,8 +30,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/transparency-dev/distributor/cmd/internal/distributor"
 	ihttp "github.com/transparency-dev/distributor/cmd/internal/http"
-	i_note "github.com/transparency-dev/distributor/internal/note"
 	"github.com/transparency-dev/formats/log"
+	f_note "github.com/transparency-dev/formats/note"
 	"golang.org/x/mod/sumdb/note"
 	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v3"
@@ -158,7 +158,7 @@ func getLogsOrDie() map[string]distributor.LogInfo {
 	}
 	ls := make(map[string]distributor.LogInfo, len(logsCfg.Logs))
 	for _, l := range logsCfg.Logs {
-		lSigV, err := i_note.NewVerifier(l.PublicKeyType, l.PublicKey)
+		lSigV, err := f_note.NewVerifier(l.PublicKey)
 		if err != nil {
 			glog.Exitf("Invalid log public key: %v", err)
 		}
@@ -192,7 +192,7 @@ func getWitnessesOrDie() map[string]note.Verifier {
 	}
 	ws := make(map[string]note.Verifier, len(witCfg.Witnesses))
 	for _, w := range witCfg.Witnesses {
-		wSigV, err := note.NewVerifier(w)
+		wSigV, err := f_note.NewVerifierForCosignatureV1(w)
 		if err != nil {
 			glog.Exitf("Invalid witness public key: %v", err)
 		}
@@ -216,10 +216,6 @@ type logConfig struct {
 	ID string `yaml:"ID"`
 	// PublicKey used to verify checkpoints from this log.
 	PublicKey string `yaml:"PublicKey"`
-	// PublicKeyType identifies the format of the key present in the PublicKey field.
-	// If unset, the key should be assumed to be in a format which `note.NewVerifier`
-	// understands.
-	PublicKeyType string `yaml:"PublicKeyType"`
 	// Origin is the expected first line of checkpoints from the log.
 	Origin string `yaml:"Origin"`
 	// URL is the URL of the root of the log.
