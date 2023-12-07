@@ -291,5 +291,5 @@ func getLatestCheckpoint(ctx context.Context, tx *sql.Tx, logID, witID string) (
 // approach is followed to ensure that the DB size stays limited, i.e. don't allow
 // the same/similar inconsistencies to be written indefinitely.
 func reportInconsistency(oldCP, newCP []byte) {
-	glog.Errorf("Found inconsistent checkpoints:\n%v\n\n%v", oldCP, newCP)
+	glog.Errorf("Found inconsistent checkpoints:\n%v\n\n%v", string(oldCP), string(newCP))
 }
