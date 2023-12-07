@@ -499,6 +499,55 @@ func TestGetCheckpointWitness(t *testing.T) {
 	}
 }
 
+func TestFiltersUnknownSignatures(t *testing.T) {
+	ws := map[string]note.Verifier{
+		"Aardvark": witAardvark.verifier,
+	}
+	ls := map[string]distributor.LogInfo{
+		"FooLog": logFoo.LogInfo,
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	db, err := helper.create("TestFiltersUnknownSignatures")
+	if err != nil {
+		t.Fatalf("helper.create(): %v", err)
+	}
+	d, err := distributor.NewDistributor(ws, ls, db)
+	if err != nil {
+		t.Fatalf("NewDistributor(): %v", err)
+	}
+	writeCP := logFoo.checkpoint(16, "16", witAardvark.signer, witChameleon.signer)
+
+	// Assert there we're starting with a surplus of signatures
+	wN, err := note.Open(writeCP, note.VerifierList([]note.Verifier{logFoo.Verifier, witAardvark.verifier, witChameleon.verifier}...))
+	if err != nil {
+		t.Fatalf("Open(writeCP): %v", err)
+	}
+	if got, want := len(wN.Sigs), 3; got != want {
+		t.Errorf("Sanity failure, want 1 log + 2 witness sigs on submitted checkpoint, got %d", got)
+	}
+
+	// Send checkpoint with "unknown" witness signature to distro
+	err = d.Distribute(ctx, "FooLog", "Aardvark", writeCP)
+	if err != nil {
+		t.Fatalf("Distribute(): %v", err)
+	}
+
+	// Assert that we get back a checkpoint with only signatures from the log and exptected witness
+	readCP, err := d.GetCheckpointWitness(ctx, logFoo.Verifier.Name(), witAardvark.verifier.Name())
+	if err != nil {
+		t.Errorf("GetCheckpointWitness: %v", err)
+	}
+	rN, err := note.Open(readCP, note.VerifierList([]note.Verifier{logFoo.Verifier, witAardvark.verifier, witChameleon.verifier}...))
+	if err != nil {
+		t.Fatalf("Open(readCP): %v", err)
+	}
+	if gotSig, wantSig, gotUnverified, wantUnverified := len(rN.Sigs), 2, len(rN.UnverifiedSigs), 0; gotSig != wantSig || gotUnverified != wantUnverified {
+		t.Errorf("got %d sigs want %d, got %d unverified sigs want %d:\n%v", gotSig, wantSig, gotUnverified, wantUnverified, string(readCP))
+	}
+}
+
 func TestGetCheckpointN(t *testing.T) {
 	// The base case for this test is that 2 checkpoints have already been written:
 	//  - aardvark, at tree size 16
@@ -805,7 +854,7 @@ type fakeLog struct {
 	signer note.Signer
 }
 
-func (l fakeLog) checkpoint(size uint64, hashSeed string, wit note.Signer) []byte {
+func (l fakeLog) checkpoint(size uint64, hashSeed string, wit ...note.Signer) []byte {
 	hbs := sha256.Sum256([]byte(hashSeed))
 	rawCP := log.Checkpoint{
 		Origin: l.Origin,
@@ -814,7 +863,7 @@ func (l fakeLog) checkpoint(size uint64, hashSeed string, wit note.Signer) []byt
 	}.Marshal()
 	n := note.Note{}
 	n.Text = string(rawCP)
-	bs, err := note.Sign(&n, []note.Signer{l.signer, wit}...)
+	bs, err := note.Sign(&n, append([]note.Signer{l.signer}, wit...)...)
 	if err != nil {
 		panic(err)
 	}

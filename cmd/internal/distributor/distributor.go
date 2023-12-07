@@ -164,6 +164,14 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 		}
 	}
 
+	// Remove any unexpected signatures submitted alongside the log+witness we recognised.
+	n.UnverifiedSigs = nil
+	nextRaw, err = note.Sign(n)
+	if err != nil {
+		return fmt.Errorf("failed to serialise note with filtered sigs: %v", err)
+	}
+	glog.V(1).Infof("Accepted: %s", string(nextRaw))
+
 	// At this point we know that we have a valid checkpoint that is fresher than any previous version for
 	// this witness. We should now store this, and then attempt to merge with other checkpoints for the same
 	// log size to create the checkpoint.N files.
@@ -283,5 +291,5 @@ func getLatestCheckpoint(ctx context.Context, tx *sql.Tx, logID, witID string) (
 // approach is followed to ensure that the DB size stays limited, i.e. don't allow
 // the same/similar inconsistencies to be written indefinitely.
 func reportInconsistency(oldCP, newCP []byte) {
-	glog.Errorf("Found inconsistent checkpoints:\n%v\n\n%v", oldCP, newCP)
+	glog.Errorf("Found inconsistent checkpoints:\n%v\n\n%v", string(oldCP), string(newCP))
 }
