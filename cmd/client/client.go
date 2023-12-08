@@ -22,6 +22,10 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/transparency-dev/distributor/client"
+	"github.com/transparency-dev/distributor/config"
+	f_log "github.com/transparency-dev/formats/log"
+	"golang.org/x/exp/maps"
+	"golang.org/x/mod/sumdb/note"
 )
 
 var (
@@ -32,6 +36,9 @@ var (
 func main() {
 	flag.Parse()
 
+	ls := getLogsOrDie()
+	ws := getWitnessesOrDie()
+
 	d := client.NewRestDistributor(*baseURL, http.DefaultClient)
 
 	logs, err := d.GetLogs()
@@ -39,11 +46,36 @@ func main() {
 		glog.Exitf("Failed to enumerate logs: %v", err)
 	}
 	for _, l := range logs {
+		log, ok := ls[string(l)]
+		if !ok {
+			glog.Warningf("Saw unknown logID %q from distributor", l)
+			continue
+		}
 		cp, err := d.GetCheckpointN(l, *n)
 		if err != nil {
-			glog.Warningf("Could not get checkpoint.%d for log %s: %v", *n, l, err)
+			glog.Warningf("Could not get checkpoint.%d for log %q (%s): %v", *n, log.Origin, l, err)
+			continue
+		}
+		if _, _, _, err := f_log.ParseCheckpoint(cp, log.Origin, log.Verifier, maps.Values(ws)...); err != nil {
+			glog.Warningf("Failed to open checkpoint: %v", err)
 			continue
 		}
 		fmt.Printf("Checkpoint.%d for log %s:\n\n%s\n\n", *n, l, cp)
 	}
+}
+
+func getLogsOrDie() map[string]config.LogInfo {
+	r, err := config.DefaultLogs()
+	if err != nil {
+		glog.Exitf("Failed to get log config: %v", err)
+	}
+	return r
+}
+
+func getWitnessesOrDie() map[uint32]note.Verifier {
+	r, err := config.DefaultWitnesses()
+	if err != nil {
+		glog.Exitf("Failed to get witness config: %v", err)
+	}
+	return r
 }
