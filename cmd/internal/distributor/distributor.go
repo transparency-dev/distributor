@@ -25,6 +25,7 @@ import (
 	"sort"
 
 	"github.com/golang/glog"
+	"github.com/transparency-dev/distributor/config"
 	"github.com/transparency-dev/distributor/internal/checkpoints"
 	"github.com/transparency-dev/formats/log"
 	"golang.org/x/mod/sumdb/note"
@@ -35,19 +36,12 @@ import (
 // maxSigs is the maximum number of sigs that can be requested.
 const maxSigs = 100
 
-// LogInfo contains the information that the distributor needs to know about
-// a log, other than its ID.
-type LogInfo struct {
-	Origin   string
-	Verifier note.Verifier
-}
-
 // NewDistributor returns a distributor that will accept checkpoints from
 // the given witnesses, for the given logs, and persist its state in the
 // database provided. Callers must call Init() on the returned distributor.
 // `ws` is a map from witness ID (verifier key name) to the note verifier.
 // `ls` is a map from log ID (github.com/transparency-dev/formats/log.ID) to log info.
-func NewDistributor(ws map[string]note.Verifier, ls map[string]LogInfo, db *sql.DB) (*Distributor, error) {
+func NewDistributor(ws map[string]note.Verifier, ls map[string]config.LogInfo, db *sql.DB) (*Distributor, error) {
 	d := &Distributor{
 		ws: ws,
 		ls: ls,
@@ -59,7 +53,7 @@ func NewDistributor(ws map[string]note.Verifier, ls map[string]LogInfo, db *sql.
 // Distributor persists witnessed checkpoints and allows querying of them.
 type Distributor struct {
 	ws map[string]note.Verifier
-	ls map[string]LogInfo
+	ls map[string]config.LogInfo
 	db *sql.DB
 }
 
