@@ -19,11 +19,15 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/golang/glog"
 	"github.com/transparency-dev/distributor/client"
 	"github.com/transparency-dev/distributor/config"
 	f_log "github.com/transparency-dev/formats/log"
+	f_note "github.com/transparency-dev/formats/note"
 	"golang.org/x/exp/maps"
 	"golang.org/x/mod/sumdb/note"
 )
@@ -43,24 +47,39 @@ func main() {
 
 	logs, err := d.GetLogs()
 	if err != nil {
-		glog.Exitf("Failed to enumerate logs: %v", err)
+		glog.Exitf("❌ Failed to enumerate logs: %v", err)
 	}
+	fmt.Println("Fetching checkpoints from distributor...")
 	for _, l := range logs {
+		fmt.Println(strings.Repeat("╾", 70))
 		log, ok := ls[string(l)]
 		if !ok {
-			glog.Warningf("Saw unknown logID %q from distributor", l)
+			fmt.Printf("️❌ Saw unknown logID %q from distributor\n", l)
 			continue
 		}
+		fmt.Printf("Log %q (%s)\n", log.Verifier.Name(), l)
 		cp, err := d.GetCheckpointN(l, *n)
 		if err != nil {
-			glog.Warningf("Could not get checkpoint.%d for log %q (%s): %v", *n, log.Origin, l, err)
+			fmt.Printf("❌️ Could not get checkpoint.%d: %v\n", *n, err)
 			continue
 		}
-		if _, _, _, err := f_log.ParseCheckpoint(cp, log.Origin, log.Verifier, maps.Values(ws)...); err != nil {
-			glog.Warningf("Failed to open checkpoint: %v", err)
+		_, _, cpN, err := f_log.ParseCheckpoint(cp, log.Origin, log.Verifier, maps.Values(ws)...)
+		if err != nil {
+			fmt.Printf("❌️ Failed to open checkpoint: %v\n", err)
 			continue
 		}
-		fmt.Printf("Checkpoint.%d for log %s:\n\n%s\n\n", *n, l, cp)
+
+		times := []string{}
+		for _, sig := range cpN.Sigs {
+			if _, ok := ws[sig.Hash]; ok {
+				t, err := f_note.CoSigV1Timestamp(sig)
+				if err != nil {
+					continue
+				}
+				times = append(times, fmt.Sprintf("— %s: %s (%s)", sig.Name, humanize.Time(t), t.Format(time.RFC3339)))
+			}
+		}
+		fmt.Printf("✅ Got checkpoint:\n\n%s\nWitness timestamps:\n%s\n\n", string(cp), strings.Join(times, "\n"))
 	}
 }
 

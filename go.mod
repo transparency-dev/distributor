@@ -5,6 +5,7 @@ go 1.20
 require (
 	cloud.google.com/go/cloudsqlconn v1.5.1
 	github.com/cenkalti/backoff v2.2.1+incompatible
+	github.com/dustin/go-humanize v1.0.1
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang/glog v1.2.0
 	github.com/golang/mock v1.6.0
@@ -12,7 +13,8 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/transparency-dev/formats v0.0.0-20231205184308-949529efd6b3
+	github.com/transparency-dev/formats v0.0.0-20231208153921-b058d7091e93
+	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.14.0
 	golang.org/x/sync v0.5.0
 	google.golang.org/grpc v1.59.0
@@ -51,13 +53,13 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.15.0 // indirect
-	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.14.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.4.0 // indirect
-	golang.org/x/tools v0.13.0 // indirect
+	golang.org/x/tools v0.16.0 // indirect
 	google.golang.org/api v0.150.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
