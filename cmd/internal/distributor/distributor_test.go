@@ -28,6 +28,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/ory/dockertest/v3"
 	"github.com/transparency-dev/distributor/cmd/internal/distributor"
+	"github.com/transparency-dev/distributor/config"
 	docktest "github.com/transparency-dev/distributor/internal/testonly/docker"
 	"github.com/transparency-dev/formats/log"
 	"golang.org/x/mod/sumdb/note"
@@ -39,14 +40,14 @@ import (
 
 var (
 	logFoo = fakeLog{
-		LogInfo: distributor.LogInfo{
+		LogInfo: config.LogInfo{
 			Origin:   "from foo",
 			Verifier: verifierOrDie("FooLog+3d42aea6+Aby03a35YY+FNI4dfRSvLtq1jQE5UjxIW5CXfK0hiIac"),
 		},
 		signer: signerOrDie("PRIVATE+KEY+FooLog+3d42aea6+AdLOqvyC6Q/86GltHux+trlUT3fRKyCtnc/1VMrmLIdo"),
 	}
 	logBar = fakeLog{
-		LogInfo: distributor.LogInfo{
+		LogInfo: config.LogInfo{
 			Origin:   "from bar",
 			Verifier: verifierOrDie("BarLog+74e9e60a+AQXax81tHt0hpLWhLfnmZ677jAQ7+PLWenJqNrj83CeC"),
 		},
@@ -174,24 +175,24 @@ func TestGetLogs(t *testing.T) {
 	ws := map[string]note.Verifier{}
 	testCases := []struct {
 		desc string
-		logs map[string]distributor.LogInfo
+		logs map[string]config.LogInfo
 		want []string
 	}{
 		{
 			desc: "No logs",
-			logs: map[string]distributor.LogInfo{},
+			logs: map[string]config.LogInfo{},
 			want: []string{},
 		},
 		{
 			desc: "One log",
-			logs: map[string]distributor.LogInfo{
+			logs: map[string]config.LogInfo{
 				"FooLog": logFoo.LogInfo,
 			},
 			want: []string{"FooLog"},
 		},
 		{
 			desc: "Two logs",
-			logs: map[string]distributor.LogInfo{
+			logs: map[string]config.LogInfo{
 				"FooLog": logFoo.LogInfo,
 				"BarLog": logBar.LogInfo,
 			},
@@ -226,7 +227,7 @@ func TestDistributeLogAndWitnessMustMatchCheckpoint(t *testing.T) {
 		"Aardvark": witAardvark.verifier,
 		"Badger":   witBadger.verifier,
 	}
-	ls := map[string]distributor.LogInfo{
+	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
 		"BarLog": logBar.LogInfo,
 	}
@@ -324,7 +325,7 @@ func TestDistributeEvolution(t *testing.T) {
 		"Aardvark": witAardvark.verifier,
 		"Badger":   witBadger.verifier,
 	}
-	ls := map[string]distributor.LogInfo{
+	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
 		"BarLog": logBar.LogInfo,
 	}
@@ -433,7 +434,7 @@ func TestGetCheckpointWitness(t *testing.T) {
 		"Aardvark": witAardvark.verifier,
 		"Badger":   witBadger.verifier,
 	}
-	ls := map[string]distributor.LogInfo{
+	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
 		"BarLog": logBar.LogInfo,
 	}
@@ -503,7 +504,7 @@ func TestFiltersUnknownSignatures(t *testing.T) {
 	ws := map[string]note.Verifier{
 		"Aardvark": witAardvark.verifier,
 	}
-	ls := map[string]distributor.LogInfo{
+	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
 	}
 
@@ -557,7 +558,7 @@ func TestGetCheckpointN(t *testing.T) {
 		"Badger":    witBadger.verifier,
 		"Chameleon": witChameleon.verifier,
 	}
-	ls := map[string]distributor.LogInfo{
+	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
 		"BarLog": logBar.LogInfo,
 	}
@@ -711,7 +712,7 @@ func TestGetCheckpointNHistoric(t *testing.T) {
 		"Badger":    witBadger.verifier,
 		"Chameleon": witChameleon.verifier,
 	}
-	ls := map[string]distributor.LogInfo{
+	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
 	}
 	type witnessAndSize struct {
@@ -850,7 +851,7 @@ func signerOrDie(skey string) note.Signer {
 }
 
 type fakeLog struct {
-	distributor.LogInfo
+	config.LogInfo
 	signer note.Signer
 }
 

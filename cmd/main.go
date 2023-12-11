@@ -30,11 +30,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/transparency-dev/distributor/cmd/internal/distributor"
 	ihttp "github.com/transparency-dev/distributor/cmd/internal/http"
-	"github.com/transparency-dev/formats/log"
-	f_note "github.com/transparency-dev/formats/note"
+	"github.com/transparency-dev/distributor/config"
 	"golang.org/x/mod/sumdb/note"
 	"golang.org/x/sync/errgroup"
-	"gopkg.in/yaml.v3"
 
 	_ "embed"
 
@@ -48,14 +46,6 @@ var (
 	mysqlURI    = flag.String("mysql_uri", "", "URI for MySQL DB")
 
 	witnessConfigFile = flag.String("witness_config_file", "", "Path to a file containing the public keys of allowed witnesses")
-
-	// configLogs is the config for the logs this distributor will accept.
-	//go:embed logs.yaml
-	configLogs []byte
-
-	// defaultWitnesses is the witness config that will be used if witness_config_file flag is not provided.
-	//go:embed witnesses.yaml
-	defaultWitnesses []byte
 )
 
 func main() {
@@ -151,80 +141,37 @@ func getCloudSqlOrDie() *sql.DB {
 	return dbPool
 }
 
-func getLogsOrDie() map[string]distributor.LogInfo {
-	logsCfg := logsConfig{}
-	if err := yaml.Unmarshal(configLogs, &logsCfg); err != nil {
+func getLogsOrDie() map[string]config.LogInfo {
+	r, err := config.DefaultLogs()
+	if err != nil {
 		glog.Exitf("Failed to unmarshal log config: %v", err)
 	}
-	ls := make(map[string]distributor.LogInfo, len(logsCfg.Logs))
-	for _, l := range logsCfg.Logs {
-		lSigV, err := f_note.NewVerifier(l.PublicKey)
-		if err != nil {
-			glog.Exitf("Invalid log public key: %v", err)
-		}
-		l.ID = log.ID(l.Origin)
-		ls[l.ID] = distributor.LogInfo{
-			Origin:   l.Origin,
-			Verifier: lSigV,
-		}
-		glog.Infof("Added log %q (%s)", l.Origin, l.ID)
+	for id, l := range r {
+		glog.Infof("Added log %q (%s)", l.Origin, id)
 	}
-	return ls
+	return r
 }
 
 func getWitnessesOrDie() map[string]note.Verifier {
-	var configWitnesses []byte
-	if len(*witnessConfigFile) == 0 {
-		glog.Info("Flag witness_config_file not specified; default witness list will be used")
-		configWitnesses = defaultWitnesses
-	} else {
-		var err error
-		configWitnesses, err = os.ReadFile(*witnessConfigFile)
+	cfg := config.WitnessesYAML
+	if *witnessConfigFile != "" {
+		c, err := os.ReadFile(*witnessConfigFile)
 		if err != nil {
 			glog.Exitf("Failed to read witness_config_file (%q): %v", *witnessConfigFile, err)
 		}
-		glog.Info("Witness list read from %v", *witnessConfigFile)
+		glog.Infof("Witness list read from %v", *witnessConfigFile)
+		cfg = c
+	} else {
+		glog.Info("Flag witness_config_file not specified; default witness list will be used")
 	}
-
-	witCfg := witnessConfig{}
-	if err := yaml.Unmarshal(configWitnesses, &witCfg); err != nil {
+	w, err := config.ParseWitnessesConfig(cfg)
+	if err != nil {
 		glog.Exitf("Failed to unmarshal witness config: %v", err)
 	}
-	ws := make(map[string]note.Verifier, len(witCfg.Witnesses))
-	for _, w := range witCfg.Witnesses {
-		wSigV, err := f_note.NewVerifierForCosignatureV1(w)
-		if err != nil {
-			glog.Exitf("Invalid witness public key: %v", err)
-		}
-		ws[wSigV.Name()] = wSigV
+
+	r := make(map[string]note.Verifier, len(w))
+	for _, v := range w {
+		r[v.Name()] = v
 	}
-
-	return ws
-}
-
-// logsConfig contains all of the metadata for the logs.
-type logsConfig struct {
-	// Log defines the log checkpoints are being distributed for.
-	Logs []logConfig `yaml:"Logs"`
-}
-
-// Log describes a verifiable log in a config file.
-type logConfig struct {
-	// ID is used to refer to the log in directory paths.
-	// This field should not be manually set in configs, instead it will be
-	// derived automatically by logfmt.ID.
-	ID string `yaml:"ID"`
-	// PublicKey used to verify checkpoints from this log.
-	PublicKey string `yaml:"PublicKey"`
-	// Origin is the expected first line of checkpoints from the log.
-	Origin string `yaml:"Origin"`
-	// URL is the URL of the root of the log.
-	// This is optional if direct log communication is not required.
-	URL string `yaml:"URL"`
-}
-
-// witnessConfig contains all of the witness public keys.
-type witnessConfig struct {
-	// Witnesses lists the public keys that will be accepted as witnesses.
-	Witnesses []string `yaml:"Witnesses"`
+	return r
 }
