@@ -16,10 +16,22 @@
 
 variable "project_id" {
   description = "The project ID to host the cluster in"
+  type        = string
 }
 
 variable "region" {
   description = "The region to host the cluster in"
+  type        = string
+}
+
+variable "env" {
+  description = "Unique identifier for the env, e.g. ci or prod"
+  type        = string
+}
+
+variable "docker_tag" {
+  description = "The tag to use for docker images to be deployed, e.g. latest"
+  type        = string
 }
 
 variable "network_name" {

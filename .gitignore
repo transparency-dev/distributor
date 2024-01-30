@@ -1,2 +1,4 @@
 /deployment/.terraform
 /deployment/*.tfstate.backup
+/deployment/**/.terragrunt-cache
+/deployment/**/.terraform.lock.hcl
