@@ -23,6 +23,11 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+# This will be configured by terragrunt when deploying
+terraform {
+  backend "gcs" {}
+}
+
 # Enable Secret Manager API
 resource "google_project_service" "secretmanager_api" {
   service            = "secretmanager.googleapis.com"
@@ -51,7 +56,7 @@ resource "random_password" "db_user_pwd" {
   special = false
 }
 resource "google_secret_manager_secret" "dbpass" {
-  secret_id = "dbpasssecret"
+  secret_id = "dbpasssecret_${var.env}"
   replication {
     auto {}
   }
@@ -78,7 +83,7 @@ locals {
     "You cannot reuse an instance name for up to a week after you have deleted an instance."
     See https://cloud.google.com/sql/docs/mysql/delete-instance for details.
   */
-  network_name = "${var.network_name}-safer-${random_id.suffix.hex}"
+  network_name = "${var.network_name}-safer-${var.env}-${random_id.suffix.hex}"
 }
 
 ###
@@ -108,7 +113,7 @@ locals {
 
 module "safer-mysql-db" {
   source               = "GoogleCloudPlatform/sql-db/google//modules/safer_mysql"
-  name                 = "distributor-mysql-instance-1"
+  name                 = "distributor-mysql-${var.env}-instance-1"
   random_instance_name = true
   project_id           = var.project_id
 
@@ -140,13 +145,13 @@ module "safer-mysql-db" {
 ### Set up Cloud Run service
 ###
 resource "google_cloud_run_v2_service" "default" {
-  name         = "distributor-service"
-  location     = "us-central1"
-  launch_stage = "BETA"
+  name         = "distributor-service-${var.env}"
+  location     = var.region
+  launch_stage = "GA"
 
   template {
     containers {
-      image = "gcr.io/trillian-opensource-ci/distributor:latest" # Image to deploy
+      image = "gcr.io/trillian-opensource-ci/distributor:${var.docker_tag}" # Image to deploy
       args = [
         "--logtostderr",
         "--v=1",
