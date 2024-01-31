@@ -107,11 +107,13 @@ func setupMonitoringOrDie() {
 	}
 
 	go func() {
-		http.Handle("/metrics", promhttp.Handler())
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", promhttp.Handler())
 		srv := &http.Server{
 			Addr:         *metricsAddr,
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 10 * time.Second,
+			Handler:      mux,
 		}
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			glog.Errorf("Error serving metrics: %v", err)
