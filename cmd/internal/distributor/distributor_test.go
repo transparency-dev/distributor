@@ -31,6 +31,7 @@ import (
 	"github.com/transparency-dev/distributor/config"
 	docktest "github.com/transparency-dev/distributor/internal/testonly/docker"
 	"github.com/transparency-dev/formats/log"
+	f_note "github.com/transparency-dev/formats/note"
 	"golang.org/x/mod/sumdb/note"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,28 +43,28 @@ var (
 	logFoo = fakeLog{
 		LogInfo: config.LogInfo{
 			Origin:   "from foo",
-			Verifier: verifierOrDie("FooLog+3d42aea6+Aby03a35YY+FNI4dfRSvLtq1jQE5UjxIW5CXfK0hiIac"),
+			Verifier: logVerifierOrDie("FooLog+3d42aea6+Aby03a35YY+FNI4dfRSvLtq1jQE5UjxIW5CXfK0hiIac"),
 		},
-		signer: signerOrDie("PRIVATE+KEY+FooLog+3d42aea6+AdLOqvyC6Q/86GltHux+trlUT3fRKyCtnc/1VMrmLIdo"),
+		signer: logSignerOrDie("PRIVATE+KEY+FooLog+3d42aea6+AdLOqvyC6Q/86GltHux+trlUT3fRKyCtnc/1VMrmLIdo"),
 	}
 	logBar = fakeLog{
 		LogInfo: config.LogInfo{
 			Origin:   "from bar",
-			Verifier: verifierOrDie("BarLog+74e9e60a+AQXax81tHt0hpLWhLfnmZ677jAQ7+PLWenJqNrj83CeC"),
+			Verifier: logVerifierOrDie("BarLog+74e9e60a+AQXax81tHt0hpLWhLfnmZ677jAQ7+PLWenJqNrj83CeC"),
 		},
-		signer: signerOrDie("PRIVATE+KEY+BarLog+74e9e60a+AckT6UKhbEXLxB57ZoqJNWRFsUJ+T6hnZrDd7G+SfZ5h"),
+		signer: logSignerOrDie("PRIVATE+KEY+BarLog+74e9e60a+AckT6UKhbEXLxB57ZoqJNWRFsUJ+T6hnZrDd7G+SfZ5h"),
 	}
 	witAardvark = fakeWitness{
-		verifier: verifierOrDie("Aardvark+871d50e2+AWvETn8gle8a0w19eLk7A9bj8INCAXa+LCJ8Om3jwYsD"),
-		signer:   signerOrDie("PRIVATE+KEY+Aardvark+871d50e2+Ad/vysEZw5Etl39nPqMjSyJ74QPxkj6W5aBEpLiJWAf2"),
+		verifier: witnessVerifierOrDie("Aardvark+871d50e2+AWvETn8gle8a0w19eLk7A9bj8INCAXa+LCJ8Om3jwYsD"),
+		signer:   witnessSignerOrDie("PRIVATE+KEY+Aardvark+871d50e2+Ad/vysEZw5Etl39nPqMjSyJ74QPxkj6W5aBEpLiJWAf2"),
 	}
 	witBadger = fakeWitness{
-		verifier: verifierOrDie("Badger+63e95ca6+AX4eM3zESdetFIvQzQ+oDf8Mw9abaSxoQv4/de28C6M6"),
-		signer:   signerOrDie("PRIVATE+KEY+Badger+63e95ca6+AcHsxVBBvaa3ACdsuqc6qfqsAkk977TlUZhnG9lOHBly"),
+		verifier: witnessVerifierOrDie("Badger+63e95ca6+AX4eM3zESdetFIvQzQ+oDf8Mw9abaSxoQv4/de28C6M6"),
+		signer:   witnessSignerOrDie("PRIVATE+KEY+Badger+63e95ca6+AcHsxVBBvaa3ACdsuqc6qfqsAkk977TlUZhnG9lOHBly"),
 	}
 	witChameleon = fakeWitness{
-		verifier: verifierOrDie("Chameleon+186bccfa+AaN3zsNcOKQuCbvH+IYe01qnvqk6hksIG9jtnsHw7O18"),
-		signer:   signerOrDie("PRIVATE+KEY+Chameleon+186bccfa+AbA2/ZLbaJDLieWGoz/UbVXlrE6ZaBBCWykVnFo5/pYM"),
+		verifier: witnessVerifierOrDie("Chameleon+186bccfa+AaN3zsNcOKQuCbvH+IYe01qnvqk6hksIG9jtnsHw7O18"),
+		signer:   witnessSignerOrDie("PRIVATE+KEY+Chameleon+186bccfa+AbA2/ZLbaJDLieWGoz/UbVXlrE6ZaBBCWykVnFo5/pYM"),
 	}
 )
 
@@ -834,7 +835,7 @@ func TestGetCheckpointNHistoric(t *testing.T) {
 	}
 }
 
-func verifierOrDie(vkey string) note.Verifier {
+func logVerifierOrDie(vkey string) note.Verifier {
 	v, err := note.NewVerifier(vkey)
 	if err != nil {
 		panic(err)
@@ -842,8 +843,24 @@ func verifierOrDie(vkey string) note.Verifier {
 	return v
 }
 
-func signerOrDie(skey string) note.Signer {
+func logSignerOrDie(skey string) note.Signer {
 	s, err := note.NewSigner(skey)
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
+func witnessVerifierOrDie(vkey string) note.Verifier {
+	v, err := f_note.NewVerifierForCosignatureV1(vkey)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+func witnessSignerOrDie(skey string) note.Signer {
+	s, err := f_note.NewSignerForCosignatureV1(skey)
 	if err != nil {
 		panic(err)
 	}
