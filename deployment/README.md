@@ -6,7 +6,7 @@ This directory contains configuration-as-code to deploy the distributor to GCP.
 
 Deploying this requires installation of:
  - `terraform`
- - `terragrunt`
+ - [`terragrunt`](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 
 ## Deploying
 
