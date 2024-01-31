@@ -85,7 +85,7 @@ func ParseWitnessesConfig(y []byte) (map[uint32]note.Verifier, error) {
 	witCfg := struct {
 		Witnesses []string `yaml:"Witnesses"`
 	}{}
-	if err := yaml.Unmarshal(WitnessesYAML, &witCfg); err != nil {
+	if err := yaml.Unmarshal(y, &witCfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal witness config: %v", err)
 	}
 	ws := make(map[uint32]note.Verifier)

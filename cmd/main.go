@@ -24,6 +24,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/cloudsqlconn"
 	"github.com/golang/glog"
@@ -33,6 +34,7 @@ import (
 	"github.com/transparency-dev/distributor/config"
 	"golang.org/x/mod/sumdb/note"
 	"golang.org/x/sync/errgroup"
+	"gopkg.in/yaml.v3"
 
 	_ "embed"
 
@@ -45,10 +47,12 @@ var (
 	useCloudSql = flag.Bool("use_cloud_sql", false, "Set to true to set up the DB connection using cloudsql connection. This will ignore mysql_uri and generate it from env variables.")
 	mysqlURI    = flag.String("mysql_uri", "", "URI for MySQL DB")
 
-	witnessConfigFile = flag.String("witness_config_file", "", "Path to a file containing the public keys of allowed witnesses")
+	witnessConfigFile = flag.String("witness_config_file", "", "Path to a file containing the public keys of allowed witnesses. Mutually exclusive with witkey.")
+	witnessKeys       witFlags
 )
 
 func main() {
+	flag.Var(&witnessKeys, "witkey", "Provide one or more witness keys directly as flags (can specify multiple times). Mutually exclusive with witness_config_file.")
 	flag.Parse()
 	ctx := context.Background()
 
@@ -153,16 +157,31 @@ func getLogsOrDie() map[string]config.LogInfo {
 }
 
 func getWitnessesOrDie() map[string]note.Verifier {
-	cfg := config.WitnessesYAML
-	if *witnessConfigFile != "" {
+	var cfg []byte
+	if witFile, witFlags := *witnessConfigFile != "", len(witnessKeys) > 0; witFile && !witFlags {
 		c, err := os.ReadFile(*witnessConfigFile)
 		if err != nil {
 			glog.Exitf("Failed to read witness_config_file (%q): %v", *witnessConfigFile, err)
 		}
 		glog.Infof("Witness list read from %v", *witnessConfigFile)
 		cfg = c
+	} else if !witFile && witFlags {
+		// This is a bit messy to turn flags into yaml and then parse them again, but the cost
+		// is small, and the benefit is that we guarantee the same parsing & instantiation logic.
+		witCfg := struct {
+			Witnesses []string `yaml:"Witnesses"`
+		}{}
+		witCfg.Witnesses = witnessKeys
+		var err error
+		cfg, err = yaml.Marshal(witCfg)
+		if err != nil {
+			glog.Exitf("Failed to marshal witness config: %v", err)
+		}
+	} else if !witFile && !witFlags {
+		glog.Info("Flags witness_config_file nor witkey are specified; default witness list will be used")
+		cfg = config.WitnessesYAML
 	} else {
-		glog.Info("Flag witness_config_file not specified; default witness list will be used")
+		glog.Exitf("Only one of witness_config_file and witkey can be specified")
 	}
 	w, err := config.ParseWitnessesConfig(cfg)
 	if err != nil {
@@ -173,5 +192,17 @@ func getWitnessesOrDie() map[string]note.Verifier {
 	for _, v := range w {
 		r[v.Name()] = v
 	}
+	glog.Infof("Configured with %d witness keys: %s", len(r), r)
 	return r
+}
+
+type witFlags []string
+
+func (wf *witFlags) String() string {
+	return strings.Join(*wf, ",")
+}
+
+func (wf *witFlags) Set(w string) error {
+	*wf = append(*wf, w)
+	return nil
 }
