@@ -34,6 +34,12 @@ variable "docker_tag" {
   type        = string
 }
 
+variable "extra_args" {
+  description = "Extra arguments to be provided to the distributor invoked in cloud run"
+  type        = list(string)
+  default     = []
+}
+
 variable "network_name" {
   default = "mysql-private"
   type    = string
