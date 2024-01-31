@@ -26,6 +26,12 @@ data "google_project" "project" {
 # This will be configured by terragrunt when deploying
 terraform {
   backend "gcs" {}
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "5.14.0"
+    }
+  }
 }
 
 # Enable Secret Manager API
@@ -91,7 +97,7 @@ locals {
 ###
 module "network-safer-mysql-simple" {
   source  = "terraform-google-modules/network/google"
-  version = "7.4.0"
+  version = "9.0.0"
 
   project_id   = var.project_id
   network_name = local.network_name
@@ -152,7 +158,8 @@ resource "google_cloud_run_v2_service" "default" {
   template {
     containers {
       image = var.distributor_docker_image
-      args = concat([
+      name  = "distributor"
+      args  = concat([
         "--logtostderr",
         "--v=1",
         "--use_cloud_sql",
@@ -185,6 +192,11 @@ resource "google_cloud_run_v2_service" "default" {
         name       = "cloudsql"
         mount_path = "/cloudsql"
       }
+    }
+    containers {
+      image = "us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.0.0"
+      name  = "collector"
+      depends_on = ["distributor"]
     }
     volumes {
       name = "cloudsql"
