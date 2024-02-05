@@ -29,8 +29,8 @@ variable "env" {
   type        = string
 }
 
-variable "docker_tag" {
-  description = "The tag to use for docker images to be deployed, e.g. latest"
+variable "distributor_docker_image" {
+  description = "The full image URL (path & tag) for the distributor docker image to deploy"
   type        = string
 }
 

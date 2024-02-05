@@ -13,8 +13,8 @@ locals {
 inputs = merge(
   local.common_vars.locals,
   {
-    docker_tag = "latest"
-    env        = "ci"
+    env                      = "ci"
+    distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:latest"
   }
 )
 

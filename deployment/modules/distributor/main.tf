@@ -151,7 +151,7 @@ resource "google_cloud_run_v2_service" "default" {
 
   template {
     containers {
-      image = "gcr.io/trillian-opensource-ci/distributor:${var.docker_tag}" # Image to deploy
+      image = var.distributor_docker_image
       args = concat([
         "--logtostderr",
         "--v=1",
