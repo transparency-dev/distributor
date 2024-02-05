@@ -25,7 +25,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"cloud.google.com/go/cloudsqlconn"
 	"github.com/golang/glog"
@@ -46,9 +45,9 @@ import (
 
 var (
 	addr        = flag.String("listen", ":8080", "Address to listen on")
-	metricsAddr = flag.String("metrics_listen", ":8081", "Address to listen on for metrics")
 	useCloudSql = flag.Bool("use_cloud_sql", false, "Set to true to set up the DB connection using cloudsql connection. This will ignore mysql_uri and generate it from env variables.")
 	mysqlURI    = flag.String("mysql_uri", "", "URI for MySQL DB")
+	exportProm  = flag.Bool("export_prometheus", true, "Set to false to disable prometheus handler from being exported at /metrics.")
 
 	witnessConfigFile = flag.String("witness_config_file", "", "Path to a file containing the public keys of allowed witnesses. Mutually exclusive with witkey.")
 	witnessKeys       witFlags
@@ -64,7 +63,6 @@ func main() {
 		glog.Exitf("Failed to listen on %q", *addr)
 	}
 
-	setupMonitoringOrDie()
 	ws := getWitnessesOrDie()
 	ls := getLogsOrDie()
 	db := getDatabaseOrDie()
@@ -74,6 +72,9 @@ func main() {
 		glog.Exitf("Failed to create distributor: %v", err)
 	}
 	r := mux.NewRouter()
+	if *exportProm {
+		r.Handle("/metrics", promhttp.Handler())
+	}
 	s := ihttp.NewServer(d)
 	s.RegisterHandlers(r)
 	srv := http.Server{
@@ -98,28 +99,6 @@ func main() {
 	if err := g.Wait(); err != nil {
 		glog.Errorf("failed with error: %v", err)
 	}
-}
-
-func setupMonitoringOrDie() {
-	if *metricsAddr == "" {
-		glog.Info("No metrics_listen address provided so skipping prometheus setup")
-		return
-	}
-
-	go func() {
-		mux := http.NewServeMux()
-		mux.Handle("/metrics", promhttp.Handler())
-		srv := &http.Server{
-			Addr:         *metricsAddr,
-			ReadTimeout:  5 * time.Second,
-			WriteTimeout: 10 * time.Second,
-			Handler:      mux,
-		}
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			glog.Errorf("Error serving metrics: %v", err)
-		}
-	}()
-	glog.Infof("Prometheus configured to listen on %q", *metricsAddr)
 }
 
 func getDatabaseOrDie() *sql.DB {
