@@ -13,8 +13,9 @@ locals {
 inputs = merge(
   local.common_vars.locals,
   {
-    docker_tag = "latest" # TODO(mhutchinson): change this to tagged releases
-    env        = "prod"
+    env                      = "prod"
+    # TODO(mhutchinson): change this to tagged releases
+    distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:latest"
   }
 )
 
