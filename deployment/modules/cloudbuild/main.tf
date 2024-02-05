@@ -30,8 +30,9 @@ locals {
 }
 
 resource "google_cloudbuild_trigger" "distributor_docker" {
-  name     = "build-distributor-docker-${var.env}"
-  location = var.region
+  name            = "build-distributor-docker-${var.env}"
+  service_account = google_service_account.cloudbuild_service_account.id
+  location        = var.region
 
   github {
     owner = "transparency-dev"
@@ -50,14 +51,40 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
         "-t", "${local.docker_address}",
         "-f", "./cmd/Dockerfile",
         "."
-        ]
+      ]
     }
     step {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "push",
         local.docker_address
-        ]
+      ]
+    }
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
     }
   }
 }
+
+resource "google_service_account" "cloudbuild_service_account" {
+  account_id = "cloudbuild-${var.env}-sa"
+}
+
+resource "google_project_iam_member" "act_as" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+resource "google_project_iam_member" "logs_writer" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+resource "google_project_iam_member" "artifact_registry_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
