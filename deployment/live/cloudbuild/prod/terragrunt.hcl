@@ -13,7 +13,8 @@ locals {
 inputs = merge(
   local.common_vars.locals,
   {
-    env = "prod"
+    env               = "prod"
+    cloud_run_service = "distributor-service-ci"
   }
 )
 

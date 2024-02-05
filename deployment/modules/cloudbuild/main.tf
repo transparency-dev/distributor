@@ -60,6 +60,20 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
         local.docker_address
       ]
     }
+    # Deploy container image to Cloud Run
+    step {
+      name       = "gcr.io/google.com/cloudsdktool/cloud-sdk"
+      entrypoint = "gcloud"
+      args       = [
+        "run",
+        "deploy",
+        var.cloud_run_service,
+        "--image",
+        local.docker_address,
+        "--region",
+        var.region
+      ]
+    }
     options {
       logging = "CLOUD_LOGGING_ONLY"
     }
@@ -86,6 +100,12 @@ resource "google_project_iam_member" "logs_writer" {
 resource "google_project_iam_member" "artifact_registry_writer" {
   project = var.project_id
   role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+resource "google_project_iam_member" "cloudrun_deployer" {
+  project = var.project_id
+  role    = "roles/run.developer"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
