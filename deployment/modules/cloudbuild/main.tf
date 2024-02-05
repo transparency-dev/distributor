@@ -67,7 +67,8 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
 }
 
 resource "google_service_account" "cloudbuild_service_account" {
-  account_id = "cloudbuild-${var.env}-sa"
+  account_id   = "cloudbuild-${var.env}-sa"
+  display_name = "Service Account for CloudBuild (${var.env})"
 }
 
 resource "google_project_iam_member" "act_as" {
