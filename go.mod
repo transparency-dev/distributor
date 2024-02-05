@@ -11,7 +11,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/mattn/go-sqlite3 v1.14.20
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/transparency-dev/formats v0.0.0-20231208153921-b058d7091e93
