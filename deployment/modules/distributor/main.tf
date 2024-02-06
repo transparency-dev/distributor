@@ -150,12 +150,44 @@ module "safer-mysql-db" {
 ###
 ### Set up Cloud Run service
 ###
+resource "google_service_account" "cloudrun_service_account" {
+  account_id   = "cloudrun-${var.env}-sa"
+  display_name = "Service Account for Cloud Run (${var.env})"
+}
+
+resource "google_project_iam_member" "iam_act_as" {
+  project = var.project_id
+  role    = "roles/iam.serviceAccountUser"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
+}
+resource "google_project_iam_member" "iam_metrics_writer" {
+  project = var.project_id
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
+}
+resource "google_project_iam_member" "iam_sql_client" {
+  project = var.project_id
+  role    = "roles/cloudsql.client"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
+}
+resource "google_project_iam_member" "iam_service_agent" {
+  project = var.project_id
+  role    = "roles/run.serviceAgent"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
+}
+resource "google_project_iam_member" "iam_secret_accessor" {
+  project = var.project_id
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
+}
+
 resource "google_cloud_run_v2_service" "default" {
   name         = "distributor-service-${var.env}"
   location     = var.region
   launch_stage = "GA"
 
   template {
+    service_account = google_service_account.cloudrun_service_account.email
     containers {
       image = var.distributor_docker_image
       name  = "distributor"
@@ -206,7 +238,16 @@ resource "google_cloud_run_v2_service" "default" {
     }
   }
   client     = "terraform"
-  depends_on = [google_project_service.secretmanager_api, google_project_service.cloudrun_api, google_project_service.sqladmin_api]
+  depends_on = [
+    google_project_service.secretmanager_api,
+    google_project_service.cloudrun_api,
+    google_project_service.sqladmin_api,
+    google_project_iam_member.iam_act_as,
+    google_project_iam_member.iam_metrics_writer,
+    google_project_iam_member.iam_sql_client,
+    google_project_iam_member.iam_service_agent,
+    google_project_iam_member.iam_secret_accessor,
+  ]
 }
 
 resource "google_cloud_run_service_iam_binding" "default" {
