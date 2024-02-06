@@ -45,7 +45,7 @@ var (
 		Help: "The total number of requests to update a checkpoint",
 	})
 	counterCheckpointUpdateSuccess = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "distributor_update_checkpoint_sucess",
+		Name: "distributor_update_checkpoint_success",
 		Help: "The total number of successful requests to update a checkpoint",
 	})
 
