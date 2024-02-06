@@ -238,7 +238,16 @@ resource "google_cloud_run_v2_service" "default" {
     }
   }
   client     = "terraform"
-  depends_on = [google_project_service.secretmanager_api, google_project_service.cloudrun_api, google_project_service.sqladmin_api]
+  depends_on = [
+    google_project_service.secretmanager_api,
+    google_project_service.cloudrun_api,
+    google_project_service.sqladmin_api,
+    google_project_iam_member.iam_act_as,
+    google_project_iam_member.iam_metrics_writer,
+    google_project_iam_member.iam_sql_client,
+    google_project_iam_member.iam_service_agent,
+    google_project_iam_member.iam_secret_accessor,
+  ]
 }
 
 resource "google_cloud_run_service_iam_binding" "default" {
