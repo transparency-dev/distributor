@@ -28,3 +28,9 @@ variable "env" {
   description = "Unique identifier for the env, e.g. ci or prod"
   type        = string
 }
+
+variable "cloud_run_service" {
+  description = "The name of the cloud run service that new images should be pushed to"
+  type        = string
+}
+
