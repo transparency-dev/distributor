@@ -196,6 +196,9 @@ resource "google_cloud_run_v2_service" "default" {
         "--v=1",
         "--use_cloud_sql",
       ], var.extra_args)
+      ports {
+        container_port = 8080
+      }
 
       env {
         name  = "INSTANCE_CONNECTION_NAME"
@@ -217,6 +220,16 @@ resource "google_cloud_run_v2_service" "default" {
             secret  = google_secret_manager_secret.dbpass.secret_id # secret name
             version = "latest"                                      # secret version number or 'latest'
           }
+        }
+      }
+
+      startup_probe {
+        initial_delay_seconds = 1
+        timeout_seconds = 1
+        period_seconds = 3
+        failure_threshold = 1
+        tcp_socket {
+          port = 8080
         }
       }
 
