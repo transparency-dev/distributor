@@ -13,3 +13,18 @@ Error: Error creating Trigger: googleapi: Error 400: Repository mapping does not
 
 This is a manual one-time step that needs to be followed to integrate GCB and the GitHub project.
 
+### Slack notifications
+
+Each cloudbuild environment sets up a Slack integration. This requires:
+ 1. A webhook to have been created in a Slack app (https://api.slack.com/apps/A06KYD43DPE/incoming-webhooks)
+ 2. This webhook URL has been stored as a secret in Secret Manager in cloud
+
+One unfortunate issue is that there is a common dependency on the pubsub topic `cloud-builds`.
+The first environment will create this, and other environments will then fail to create it because the name is in use.
+To work around this:
+
+```
+terragrunt import module.cloud-build-slack-notifier.google_pubsub_topic.cloud_builds projects/checkpoint-distributor/topics/cloud-builds
+```
+
+This imports the resource into this configuration, and running `terragrunt apply` again after this should work.

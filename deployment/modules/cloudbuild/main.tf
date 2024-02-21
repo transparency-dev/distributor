@@ -117,7 +117,7 @@ module "cloud-build-slack-notifier" {
   # source  = "simplifi/cloud-build-slack-notifier/google"
   # version = "0.3.0"
 
-  name       = "gcp-slack-notifier-${var.env}"
+  name       = "gcp-slack-${var.env}"
   project_id = var.project_id
   
   # https://api.slack.com/apps/A06KYD43DPE/incoming-webhooks
