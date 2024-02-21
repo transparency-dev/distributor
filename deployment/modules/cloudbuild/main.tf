@@ -110,9 +110,10 @@ resource "google_project_iam_member" "cloudrun_deployer" {
 }
 
 module "cloud-build-slack-notifier" {
-  # This should be set back to the registry version when the following is merged:
+  # This should be set back to the registry version when the following are merged:
   # https://github.com/simplifi/terraform-google-cloud-build-slack-notifier/pull/8
-  source     = "github.com/mhutchinson/terraform-google-cloud-build-slack-notifier"
+  # https://github.com/simplifi/terraform-google-cloud-build-slack-notifier/pull/9
+  source     = "github.com/mhutchinson/terraform-google-cloud-build-slack-notifier?ref=4e525d3"
   # source  = "simplifi/cloud-build-slack-notifier/google"
   # version = "0.3.0"
 
@@ -122,5 +123,7 @@ module "cloud-build-slack-notifier" {
   # https://api.slack.com/apps/A06KYD43DPE/incoming-webhooks
   slack_webhook_url_secret_id      = "gcb_slack_webhook_${var.env}"
   slack_webhook_url_secret_project = var.project_id
+
+  override_slack_template_json = var.slack_template_json
 }
 
