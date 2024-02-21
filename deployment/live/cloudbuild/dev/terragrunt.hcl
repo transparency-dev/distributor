@@ -13,8 +13,9 @@ locals {
 inputs = merge(
   local.common_vars.locals,
   {
-    env               = "dev"
-    cloud_run_service = "distributor-service-dev"
+    env                 = "dev"
+    cloud_run_service   = "distributor-service-dev"
+    slack_template_json = file("slack.json")
   }
 )
 
