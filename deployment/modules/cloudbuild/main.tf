@@ -19,7 +19,7 @@ terraform {
 
 resource "google_artifact_registry_repository" "distributor_docker" {
   repository_id = "distributor-docker-${var.env}"
-  location       = var.region
+  location      = var.region
   description   = "docker images for the distributor"
   format        = "DOCKER"
 }
@@ -64,7 +64,7 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
     step {
       name       = "gcr.io/google.com/cloudsdktool/cloud-sdk"
       entrypoint = "gcloud"
-      args       = [
+      args = [
         "run",
         "deploy",
         var.cloud_run_service,
@@ -110,16 +110,12 @@ resource "google_project_iam_member" "cloudrun_deployer" {
 }
 
 module "cloud-build-slack-notifier" {
-  # This should be set back to the registry version when the following are merged:
-  # https://github.com/simplifi/terraform-google-cloud-build-slack-notifier/pull/8
-  # https://github.com/simplifi/terraform-google-cloud-build-slack-notifier/pull/9
-  source     = "github.com/mhutchinson/terraform-google-cloud-build-slack-notifier?ref=4e525d3"
-  # source  = "simplifi/cloud-build-slack-notifier/google"
-  # version = "0.3.0"
+  source  = "simplifi/cloud-build-slack-notifier/google"
+  version = "0.4.0"
 
   name       = "gcp-slack-${var.env}"
   project_id = var.project_id
-  
+
   # https://api.slack.com/apps/A06KYD43DPE/incoming-webhooks
   slack_webhook_url_secret_id      = "gcb_slack_webhook_${var.env}"
   slack_webhook_url_secret_project = var.project_id
