@@ -1,13 +1,26 @@
 [
     {
-      "type": "section",
+      "type": "header",
       "text": {
-        "type": "mrkdwn",
-        "text": "Cloud Build {{.Build.ProjectId}} {{.Build.Id}} {{.Build.Status}}"
+        "type": "plain_text",
+        "text": "CloudBuild {{.Build.Status}}: {{.Build.Substitutions.REPO_NAME}} {{.Build.Substitutions.TRIGGER_NAME}}"
       }
     },
     {
       "type": "divider"
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Branch*: {{.Build.Substitutions.BRANCH_NAME}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Commit*: {{.Build.Substitutions.SHORT_SHA}}"
+        }
+      ]
     },
     {
       "type": "section",
