@@ -115,6 +115,8 @@ module "cloud-build-slack-notifier" {
   name       = "gcp-slack-${var.env}"
   project_id = var.project_id
 
+  cloud_build_event_filter = "build.substitutions['BRANCH_NAME'] == 'main' && build.status in [Build.Status.SUCCESS, Build.Status.FAILURE, Build.Status.TIMEOUT] && build.substitutions['TRIGGER_NAME'].endsWith('-${var.env}')"
+
   # https://api.slack.com/apps/A06KYD43DPE/incoming-webhooks
   slack_webhook_url_secret_id      = "gcb_slack_webhook_${var.env}"
   slack_webhook_url_secret_project = var.project_id
