@@ -6,7 +6,7 @@
 version: 2
 updates:
 - package-ecosystem: gomod
-  directory: "/"
+  directory: /
   groups:
     all-go-deps:
       patterns:
@@ -28,3 +28,13 @@ updates:
   commit-message:
     prefix: ":seedling:"
     include: "scope"
+
+- package-ecosystem: github-actions
+  directory: /
+  schedule:
+    interval: daily
+
+- package-ecosystem: docker
+  directory: /cmd
+  schedule:
+    interval: daily
