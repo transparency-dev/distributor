@@ -82,7 +82,7 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
 }
 
 # When a new tag is pushed to GitHub, add that tag to the docker
-# iamge that was already pushed to the repo for the corresponding
+# image that was already pushed to the repo for the corresponding
 # commit hash.
 # This requires that the above step has already completed, but that
 # seems like a fair assumption given that we'd have deployed it in ci
