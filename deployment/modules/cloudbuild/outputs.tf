@@ -29,7 +29,7 @@ output "cloudbuild_trigger_id" {
   value       = google_cloudbuild_trigger.distributor_docker.id
 }
 
-output "docker_image_latest" {
-  description = "The address of the latest docker image that will be built"
-  value       = local.docker_address
+output "docker_image" {
+  description = "The address of the docker image that will be built"
+  value       = local.docker_image
 }
