@@ -31,5 +31,5 @@ output "cloudbuild_trigger_id" {
 
 output "docker_image_latest" {
   description = "The address of the latest docker image that will be built"
-  value       = local.docker_address
+  value       = local.docker_image
 }

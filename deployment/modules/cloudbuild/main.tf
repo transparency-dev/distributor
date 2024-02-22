@@ -26,7 +26,7 @@ resource "google_artifact_registry_repository" "distributor_docker" {
 
 locals {
   artifact_repo  = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
-  docker_address = "${local.artifact_repo}/distributor:latest"
+  docker_image   = "${local.artifact_repo}/distributor"
 }
 
 resource "google_cloudbuild_trigger" "distributor_docker" {
@@ -47,7 +47,8 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "build",
-        "-t", "${local.docker_address}",
+        "-t", "${local.docker_image}:$SHORT_SHA",
+        "-t", "${local.docker_image}:latest",
         "-f", "./cmd/Dockerfile",
         "."
       ]
@@ -56,7 +57,8 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "push",
-        local.docker_address
+        "--all-tags",
+        local.docker_image
       ]
     }
     # Deploy container image to Cloud Run
@@ -68,9 +70,57 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
         "deploy",
         var.cloud_run_service,
         "--image",
-        local.docker_address,
+        "${local.docker_image}:$SHORT_SHA",
         "--region",
         var.region
+      ]
+    }
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
+    }
+  }
+}
+
+# When a new tag is pushed to GitHub, add that tag to the docker
+# iamge that was already pushed to the repo for the corresponding
+# commit hash.
+# This requires that the above step has already completed, but that
+# seems like a fair assumption given that we'd have deployed it in ci
+# before tagging it.
+resource "google_cloudbuild_trigger" "distributor_docker_tag" {
+  name            = "tag-distributor-docker-${var.env}"
+  service_account = google_service_account.cloudbuild_service_account.id
+  location        = var.region
+
+  github {
+    owner = "transparency-dev"
+    name  = "distributor"
+    push {
+      tag = ".*"
+    }
+  }
+
+  build {
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "pull",
+        "${local.docker_image}:$SHORT_SHA",
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "tag",
+        "${local.docker_image}:$SHORT_SHA",
+        "${local.docker_image}:$TAG_NAME",
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "push",
+        "${local.docker_image}:$TAG_NAME",
       ]
     }
     options {
