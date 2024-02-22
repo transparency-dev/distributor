@@ -750,7 +750,7 @@ func TestGetCheckpointNHistoric(t *testing.T) {
 			wantSize: 22,
 		},
 		{
-			desc: "TODO: N=2 can get historic version where both were in sync together",
+			desc: "N=2 can get historic version where both were in sync together",
 			order: []witnessAndSize{
 				{
 					witChameleon,
@@ -788,7 +788,7 @@ func TestGetCheckpointNHistoric(t *testing.T) {
 			reqN:        2,
 			wantErr:     true,
 			wantErrCode: codes.NotFound,
-			// TODO(mhutchinson): this case should work with the following assertions
+			// TODO(#103): this case should work with the following assertions
 			// wantErr: false,
 			// wantSize: 10,
 		},

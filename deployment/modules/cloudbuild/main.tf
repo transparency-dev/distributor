@@ -42,7 +42,6 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
     }
   }
 
-  # TODO(mhutchinson): Consider replacing this with https://github.com/ko-build/terraform-provider-ko
   build {
     step {
       name = "gcr.io/cloud-builders/docker"
