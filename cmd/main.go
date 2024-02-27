@@ -193,12 +193,8 @@ func getWitnessesOrDie() map[string]note.Verifier {
 		glog.Exitf("Failed to unmarshal witness config: %v", err)
 	}
 
-	r := make(map[string]note.Verifier, len(w))
-	for _, v := range w {
-		r[v.Name()] = v
-	}
-	glog.Infof("Configured with %d witness keys: %s", len(r), r)
-	return r
+	glog.Infof("Configured with %d witness keys: %s", len(w), w)
+	return w
 }
 
 type witFlags []string

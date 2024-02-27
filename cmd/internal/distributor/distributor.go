@@ -71,22 +71,31 @@ var (
 // NewDistributor returns a distributor that will accept checkpoints from
 // the given witnesses, for the given logs, and persist its state in the
 // database provided. Callers must call Init() on the returned distributor.
-// `ws` is a map from witness ID (verifier key name) to the note verifier.
+// `ws` is a map from witness raw verifier string to the note verifier.
 // `ls` is a map from log ID (github.com/transparency-dev/formats/log.ID) to log info.
 func NewDistributor(ws map[string]note.Verifier, ls map[string]config.LogInfo, db *sql.DB) (*Distributor, error) {
+	witsByID := make(map[string]note.Verifier, len(ws))
+	rawVKeys := make([]string, 0, len(ws))
+	for k, v := range ws {
+		rawVKeys = append(rawVKeys, k)
+		witsByID[v.Name()] = v
+	}
+	sort.Strings(rawVKeys)
 	d := &Distributor{
-		ws: ws,
-		ls: ls,
-		db: db,
+		ws:      ws,
+		witKeys: rawVKeys,
+		ls:      ls,
+		db:      db,
 	}
 	return d, d.init()
 }
 
 // Distributor persists witnessed checkpoints and allows querying of them.
 type Distributor struct {
-	ws map[string]note.Verifier
-	ls map[string]config.LogInfo
-	db *sql.DB
+	ws      map[string]note.Verifier
+	witKeys []string
+	ls      map[string]config.LogInfo
+	db      *sql.DB
 }
 
 // GetLogs returns a list of all log IDs the distributor is aware of, sorted
@@ -98,6 +107,12 @@ func (d *Distributor) GetLogs(ctx context.Context) ([]string, error) {
 	}
 	sort.Strings(r)
 	return r, nil
+}
+
+// GetLogs returns a list of all witness verifier keys that the distributor is
+// aware of, sorted by the key.
+func (d *Distributor) GetWitnesses(ctx context.Context) ([]string, error) {
+	return d.witKeys, nil
 }
 
 // GetCheckpointN gets the largest checkpoint for a given log that has at least `n` signatures.

@@ -30,4 +30,7 @@ const (
 	// HTTPGetLogs is the path of the URL to get a list of all logs the
 	// distributor is aware of.
 	HTTPGetLogs = "/distributor/v0/logs"
+	// HTTPGetWitnesses is the path of the URL to get a list of all witnesses
+	// that the distributor is aware of.
+	HTTPGetWitnesses = "/distributor/v0/witnesses"
 )
