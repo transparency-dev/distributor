@@ -24,8 +24,8 @@ import (
 	"strconv"
 
 	"github.com/golang/glog"
-	"github.com/transparency-dev/distributor/api"
 	"github.com/gorilla/mux"
+	"github.com/transparency-dev/distributor/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,6 +35,9 @@ type Distributor interface {
 	// GetLogs returns a list of all log IDs the distributor is aware of, sorted
 	// by the ID.
 	GetLogs(ctx context.Context) ([]string, error)
+	// GetWitnesses returns a list of all witness verifier keys the distributor is
+	// aware of, sorted by the ID.
+	GetWitnesses(ctx context.Context) ([]string, error)
 	// GetCheckpointN gets the largest checkpoint for a given log that has at least `n` signatures.
 	GetCheckpointN(ctx context.Context, logID string, n uint32) ([]byte, error)
 	// GetCheckpointWitness gets the largest checkpoint for the log that was witnessed by the given witness.
@@ -115,7 +118,7 @@ func (s *Server) getCheckpointWitness(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// getLogs returns a list of all logs the witness is aware of.
+// getLogs returns a list of all logs the distributor is aware of.
 func (s *Server) getLogs(w http.ResponseWriter, r *http.Request) {
 	logs, err := s.d.GetLogs(r.Context())
 	if err != nil {
@@ -133,6 +136,24 @@ func (s *Server) getLogs(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// getWitnesses returns a list of all witnesses the distributor is aware of.
+func (s *Server) getWitnesses(w http.ResponseWriter, r *http.Request) {
+	witnesses, err := s.d.GetWitnesses(r.Context())
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to get witness list: %v", err), http.StatusInternalServerError)
+		return
+	}
+	witnessList, err := json.Marshal(witnesses)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to convert witness list to JSON: %v", err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/json")
+	if _, err := w.Write(witnessList); err != nil {
+		glog.Errorf("w.Write(): %v", err)
+	}
+}
+
 // RegisterHandlers registers HTTP handlers for witness endpoints.
 func (s *Server) RegisterHandlers(r *mux.Router) {
 	logStr := "{logid:[a-zA-Z0-9-]+}"
@@ -141,6 +162,7 @@ func (s *Server) RegisterHandlers(r *mux.Router) {
 	r.HandleFunc(fmt.Sprintf(api.HTTPCheckpointByWitness, logStr, witStr), s.update).Methods("PUT")
 	r.HandleFunc(fmt.Sprintf(api.HTTPCheckpointByWitness, logStr, witStr), s.getCheckpointWitness).Methods("GET")
 	r.HandleFunc(api.HTTPGetLogs, s.getLogs).Methods("GET")
+	r.HandleFunc(api.HTTPGetWitnesses, s.getWitnesses).Methods("GET")
 }
 
 func httpForCode(c codes.Code) int {

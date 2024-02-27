@@ -61,6 +61,24 @@ func (d *RestDistributor) GetLogs() ([]LogID, error) {
 	return r, nil
 }
 
+// GetWitnesses returns the verifier keys for all witnesses that
+// the distributor knows about.
+func (d *RestDistributor) GetWitnesses() ([]string, error) {
+	u, err := url.Parse(d.baseURL + api.HTTPGetWitnesses)
+	if err != nil {
+		return nil, err
+	}
+	r := make([]string, 0)
+	bs, err := d.fetchData(u)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(bs, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // GetCheckpointN returns the freshest checkpoint for the log that at least N witnesses
 // have provided signatures for.
 func (d *RestDistributor) GetCheckpointN(l LogID, n uint) ([]byte, error) {

@@ -41,8 +41,8 @@ func DefaultLogs() (map[string]LogInfo, error) {
 }
 
 // DeafultWitnesses returns a parsed representation of the embedded WitnessesYAML config.
-// The returned map is keyed by the witness verifier key hash.
-func DefaultWitnesses() (map[uint32]note.Verifier, error) {
+// The returned map is keyed by the raw verifier key string.
+func DefaultWitnesses() (map[string]note.Verifier, error) {
 	return ParseWitnessesConfig(WitnessesYAML)
 }
 
@@ -80,22 +80,21 @@ func ParseLogConfig(y []byte) (map[string]LogInfo, error) {
 }
 
 // ParseWitnessesConfig parses the passed in witnesses config, and returns a map keyed
-// by witness verified key hash.
-func ParseWitnessesConfig(y []byte) (map[uint32]note.Verifier, error) {
+// by the raw verifier key string.
+func ParseWitnessesConfig(y []byte) (map[string]note.Verifier, error) {
 	witCfg := struct {
 		Witnesses []string `yaml:"Witnesses"`
 	}{}
 	if err := yaml.Unmarshal(y, &witCfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal witness config: %v", err)
 	}
-	ws := make(map[uint32]note.Verifier)
+	ws := make(map[string]note.Verifier)
 	for _, w := range witCfg.Witnesses {
 		wSigV, err := f_note.NewVerifierForCosignatureV1(w)
 		if err != nil {
 			return nil, fmt.Errorf("invalid witness public key: %v", err)
 		}
-		ws[wSigV.KeyHash()] = wSigV
+		ws[w] = wSigV
 	}
-
 	return ws, nil
 }
