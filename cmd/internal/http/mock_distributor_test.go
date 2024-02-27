@@ -91,3 +91,18 @@ func (mr *MockDistributorMockRecorder) GetLogs(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLogs", reflect.TypeOf((*MockDistributor)(nil).GetLogs), arg0)
 }
+
+// GetWitnesses mocks base method.
+func (m *MockDistributor) GetWitnesses(arg0 context.Context) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWitnesses", arg0)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWitnesses indicates an expected call of GetWitnesses.
+func (mr *MockDistributorMockRecorder) GetWitnesses(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWitnesses", reflect.TypeOf((*MockDistributor)(nil).GetWitnesses), arg0)
+}

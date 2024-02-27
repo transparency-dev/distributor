@@ -40,10 +40,10 @@ var (
 func main() {
 	flag.Parse()
 
-	ls := getLogsOrDie()
-	ws := getWitnessesOrDie()
-
 	d := client.NewRestDistributor(*baseURL, http.DefaultClient)
+
+	ls := getLogsOrDie()
+	ws := getWitnessesOrDie(d)
 
 	logs, err := d.GetLogs()
 	if err != nil {
@@ -91,10 +91,19 @@ func getLogsOrDie() map[string]config.LogInfo {
 	return r
 }
 
-func getWitnessesOrDie() map[uint32]note.Verifier {
-	r, err := config.DefaultWitnesses()
+func getWitnessesOrDie(c *client.RestDistributor) map[uint32]note.Verifier {
+	rawWs, err := c.GetWitnesses()
 	if err != nil {
-		glog.Exitf("Failed to get witness config: %v", err)
+		glog.Exitf("Failed to GetWitnesses() from distributor: %v", err)
 	}
-	return r
+
+	ws := make(map[uint32]note.Verifier)
+	for _, w := range rawWs {
+		wSigV, err := f_note.NewVerifierForCosignatureV1(w)
+		if err != nil {
+			glog.Exitf("Invalid witness public key retrieved from distributor: %v: %v", w, err)
+		}
+		ws[wSigV.KeyHash()] = wSigV
+	}
+	return ws
 }
