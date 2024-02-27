@@ -29,11 +29,6 @@ updates:
     prefix: ":seedling:"
     include: "scope"
 
-- package-ecosystem: github-actions
-  directory: /
-  schedule:
-    interval: daily
-
 - package-ecosystem: docker
   directory: /cmd
   schedule:
