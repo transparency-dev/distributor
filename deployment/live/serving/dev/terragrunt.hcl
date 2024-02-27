@@ -7,19 +7,18 @@ terraform {
 }
 
 locals {
-  common_vars = read_terragrunt_config(find_in_parent_folders())
+  env           = "dev"
+  common_vars   = read_terragrunt_config(find_in_parent_folders())
+  witnesses_raw = yamldecode(file("${get_path_to_repo_root()}/config/witnesses-${local.env}.yaml"))
+  witnessArgs   = [for w in local.witnesses_raw.Witnesses : "--witkey=${w}"]
 }
 
 inputs = merge(
   local.common_vars.locals,
   {
-    env                      = "dev"
+    env                      = local.env
     distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-dev/distributor:latest"
-    extra_args               = [
-      "--witkey=mhutchinson.witness+384b3dbc+AfWg+7+qmcFoMuIM0ZGe4ZsIuc6gEg3EL0cKkNVolCA+",
-      "--witkey=wolsey-bank-alfred+0336ecb0+AVcofP6JyFkxhQ+/FK7omBtGLVS22tGC6fH+zvK5WrIx",
-      "--witkey=JKU-INS+814e35bf+AdYBKkmgKGzao81EKOSxkphZLDtgBf72VXHFOIhMmqvO",
-    ]
+    extra_args               = local.witnessArgs
   }
 )
 

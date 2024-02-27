@@ -29,21 +29,12 @@ import (
 var (
 	//go:embed logs.yaml
 	LogsYAML []byte
-
-	//go:embed witnesses.yaml
-	WitnessesYAML []byte
 )
 
 // DefaultLogs returns a parsed representation of the embedded LogsYAML config.
 // The returned map is keyed by LogID.
 func DefaultLogs() (map[string]LogInfo, error) {
 	return ParseLogConfig(LogsYAML)
-}
-
-// DeafultWitnesses returns a parsed representation of the embedded WitnessesYAML config.
-// The returned map is keyed by the raw verifier key string.
-func DefaultWitnesses() (map[string]note.Verifier, error) {
-	return ParseWitnessesConfig(WitnessesYAML)
 }
 
 // LogInfo contains the information that the distributor needs to know about
