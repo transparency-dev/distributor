@@ -1,20 +1,13 @@
-include {
-  path = find_in_parent_folders()
-}
-
-terraform {
-  source = "${get_path_to_repo_root()}/deployment/modules/distributor"
-}
-
-locals {
-  common_vars = read_terragrunt_config(find_in_parent_folders())
+include "root" {
+  path   = find_in_parent_folders()
+  expose = true
 }
 
 inputs = merge(
-  local.common_vars.locals,
+  include.root.locals,
   {
-    env                      = "ci"
     distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:latest"
+    extra_args               = include.root.locals.witnessArgs
   }
 )
 

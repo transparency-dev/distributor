@@ -183,8 +183,7 @@ func getWitnessesOrDie() map[string]note.Verifier {
 			glog.Exitf("Failed to marshal witness config: %v", err)
 		}
 	} else if !witFile && !witFlags {
-		glog.Info("Flags witness_config_file nor witkey are specified; default witness list will be used")
-		cfg = config.WitnessesYAML
+		glog.Exitf("Neither flags witness_config_file nor witkey are specified")
 	} else {
 		glog.Exitf("Only one of witness_config_file and witkey can be specified")
 	}
