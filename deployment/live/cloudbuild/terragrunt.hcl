@@ -1,3 +1,7 @@
+terraform {
+  source = "${get_repo_root()}/deployment/modules/cloudbuild"
+}
+
 locals {
   project_id  = "checkpoint-distributor"
   region      = "us-central1"
