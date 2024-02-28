@@ -14,7 +14,7 @@ inputs = merge(
   local.common_vars.locals,
   {
     env                      = "prod"
-    distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:v0.1.0"
+    distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:v0.1.1"
   }
 )
 
