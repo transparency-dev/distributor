@@ -3,10 +3,6 @@ include "root" {
   expose = true
 }
 
-terraform {
-  source = "${get_repo_root()}/deployment/modules/distributor"
-}
-
 inputs = merge(
   include.root.locals,
   {
