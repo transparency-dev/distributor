@@ -82,7 +82,7 @@ func NewDistributor(ws map[string]note.Verifier, ls map[string]config.LogInfo, d
 	}
 	sort.Strings(rawVKeys)
 	d := &Distributor{
-		ws:      ws,
+		ws:      witsByID,
 		witKeys: rawVKeys,
 		ls:      ls,
 		db:      db,
