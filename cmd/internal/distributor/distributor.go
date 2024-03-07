@@ -251,7 +251,9 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 			return status.Errorf(codes.Internal, "failed to scan rows: %v", err)
 		}
 		allCheckpoints = append(allCheckpoints, cp)
-		witnesses = append(witnesses, d.ws[witID])
+		if w, ok := d.ws[witID]; ok {
+			witnesses = append(witnesses, w)
+		}
 	}
 
 	if err := rows.Err(); err != nil {
