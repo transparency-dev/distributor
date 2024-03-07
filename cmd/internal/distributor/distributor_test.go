@@ -554,6 +554,58 @@ func TestFiltersUnknownSignatures(t *testing.T) {
 	}
 }
 
+func TestDisappearingWitness(t *testing.T) {
+	ws := map[string]note.Verifier{
+		aardvarkVKey: witAardvark.verifier,
+		badgerVKey:   witBadger.verifier,
+	}
+	ls := map[string]config.LogInfo{
+		"FooLog": logFoo.LogInfo,
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	db, err := helper.create("TestDisappearingWitness")
+	if err != nil {
+		t.Fatalf("helper.create(): %v", err)
+	}
+
+	// Put a checkpoint in sigs from a known witness.
+	{
+		d, err := distributor.NewDistributor(ws, ls, db)
+		if err != nil {
+			t.Fatalf("NewDistributor(): %v", err)
+		}
+
+		writeCP := logFoo.checkpoint(16, "16", witAardvark.signer)
+		err = d.Distribute(ctx, "FooLog", "Aardvark", writeCP)
+		if err != nil {
+			t.Fatalf("Distribute(): %v", err)
+		}
+	}
+
+	// Now remove one of the witnesses; it was a bad aardvark.
+	ws = map[string]note.Verifier{
+		badgerVKey:    witBadger.verifier,
+		chameleonVKey: witChameleon.verifier,
+	}
+
+	// Now recreate the distributor instance to represent re-deploying after the config update, and
+	// try to update the checkpoint with a new signature from another known witness.
+	{
+		d, err := distributor.NewDistributor(ws, ls, db)
+		if err != nil {
+			t.Fatalf("NewDistributor(): %v", err)
+		}
+
+		writeCP := logFoo.checkpoint(16, "16", witBadger.signer)
+		err = d.Distribute(ctx, "FooLog", "Badger", writeCP)
+		if err != nil {
+			t.Fatalf("Distribute(): %v", err)
+		}
+	}
+}
+
 func TestGetCheckpointN(t *testing.T) {
 	// The base case for this test is that 2 checkpoints have already been written:
 	//  - aardvark, at tree size 16
