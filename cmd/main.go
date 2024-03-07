@@ -194,7 +194,7 @@ func getWitnessesOrDie() map[string]note.Verifier {
 
 	glog.Infof("Configured with %d witness keys", len(w))
 	if glog.V(1) {
-		for k, _ := range w {
+		for k := range w {
 			glog.V(1).Infof("  %s", k)
 		}
 	}
