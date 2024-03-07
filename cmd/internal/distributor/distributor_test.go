@@ -40,6 +40,10 @@ import (
 )
 
 var (
+	aardvarkVKey  = "Aardvark+871d50e2+AWvETn8gle8a0w19eLk7A9bj8INCAXa+LCJ8Om3jwYsD"
+	badgerVKey    = "Badger+63e95ca6+AX4eM3zESdetFIvQzQ+oDf8Mw9abaSxoQv4/de28C6M6"
+	chameleonVKey = "Chameleon+186bccfa+AaN3zsNcOKQuCbvH+IYe01qnvqk6hksIG9jtnsHw7O18"
+
 	logFoo = fakeLog{
 		LogInfo: config.LogInfo{
 			Origin:   "from foo",
@@ -55,15 +59,15 @@ var (
 		signer: logSignerOrDie("PRIVATE+KEY+BarLog+74e9e60a+AckT6UKhbEXLxB57ZoqJNWRFsUJ+T6hnZrDd7G+SfZ5h"),
 	}
 	witAardvark = fakeWitness{
-		verifier: witnessVerifierOrDie("Aardvark+871d50e2+AWvETn8gle8a0w19eLk7A9bj8INCAXa+LCJ8Om3jwYsD"),
+		verifier: witnessVerifierOrDie(aardvarkVKey),
 		signer:   witnessSignerOrDie("PRIVATE+KEY+Aardvark+871d50e2+Ad/vysEZw5Etl39nPqMjSyJ74QPxkj6W5aBEpLiJWAf2"),
 	}
 	witBadger = fakeWitness{
-		verifier: witnessVerifierOrDie("Badger+63e95ca6+AX4eM3zESdetFIvQzQ+oDf8Mw9abaSxoQv4/de28C6M6"),
+		verifier: witnessVerifierOrDie(badgerVKey),
 		signer:   witnessSignerOrDie("PRIVATE+KEY+Badger+63e95ca6+AcHsxVBBvaa3ACdsuqc6qfqsAkk977TlUZhnG9lOHBly"),
 	}
 	witChameleon = fakeWitness{
-		verifier: witnessVerifierOrDie("Chameleon+186bccfa+AaN3zsNcOKQuCbvH+IYe01qnvqk6hksIG9jtnsHw7O18"),
+		verifier: witnessVerifierOrDie(chameleonVKey),
 		signer:   witnessSignerOrDie("PRIVATE+KEY+Chameleon+186bccfa+AbA2/ZLbaJDLieWGoz/UbVXlrE6ZaBBCWykVnFo5/pYM"),
 	}
 )
@@ -225,8 +229,8 @@ func TestGetLogs(t *testing.T) {
 
 func TestDistributeLogAndWitnessMustMatchCheckpoint(t *testing.T) {
 	ws := map[string]note.Verifier{
-		"Aardvark": witAardvark.verifier,
-		"Badger":   witBadger.verifier,
+		aardvarkVKey: witAardvark.verifier,
+		badgerVKey:   witBadger.verifier,
 	}
 	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
@@ -323,8 +327,8 @@ func TestDistributeEvolution(t *testing.T) {
 	// The base case for this test is that a single checkpoint has already
 	// been registered for log foo, by aardvark, at tree size 16, with root hash H("16").
 	ws := map[string]note.Verifier{
-		"Aardvark": witAardvark.verifier,
-		"Badger":   witBadger.verifier,
+		aardvarkVKey: witAardvark.verifier,
+		badgerVKey:   witBadger.verifier,
 	}
 	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
@@ -432,8 +436,8 @@ func TestGetCheckpointWitness(t *testing.T) {
 	// The base case for this test is that a single checkpoint has already
 	// been registered for log foo, by aardvark, at tree size 16, with root hash H("16").
 	ws := map[string]note.Verifier{
-		"Aardvark": witAardvark.verifier,
-		"Badger":   witBadger.verifier,
+		aardvarkVKey: witAardvark.verifier,
+		badgerVKey:   witBadger.verifier,
 	}
 	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
@@ -503,7 +507,7 @@ func TestGetCheckpointWitness(t *testing.T) {
 
 func TestFiltersUnknownSignatures(t *testing.T) {
 	ws := map[string]note.Verifier{
-		"Aardvark": witAardvark.verifier,
+		aardvarkVKey: witAardvark.verifier,
 	}
 	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
@@ -555,9 +559,9 @@ func TestGetCheckpointN(t *testing.T) {
 	//  - aardvark, at tree size 16
 	//  - chameleon, at tree size 14
 	ws := map[string]note.Verifier{
-		"Aardvark":  witAardvark.verifier,
-		"Badger":    witBadger.verifier,
-		"Chameleon": witChameleon.verifier,
+		aardvarkVKey: witAardvark.verifier,
+		badgerVKey:   witBadger.verifier,
+		"Chameleon":  witChameleon.verifier,
 	}
 	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
@@ -709,9 +713,9 @@ func TestGetCheckpointN(t *testing.T) {
 
 func TestGetCheckpointNHistoric(t *testing.T) {
 	ws := map[string]note.Verifier{
-		"Aardvark":  witAardvark.verifier,
-		"Badger":    witBadger.verifier,
-		"Chameleon": witChameleon.verifier,
+		aardvarkVKey: witAardvark.verifier,
+		badgerVKey:   witBadger.verifier,
+		"Chameleon":  witChameleon.verifier,
 	}
 	ls := map[string]config.LogInfo{
 		"FooLog": logFoo.LogInfo,
