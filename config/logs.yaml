@@ -16,3 +16,5 @@ Logs:
     PublicKey: lvfs+7908d142+ASnlGgOh+634tcE/2Lp3wV7k/cLoU6ncawmb/BLC1oMU
   - Origin: transparency.dev/armored-witness/firmware_transparency/ci/2
     PublicKey: transparency.dev-aw-ftlog-ci-2+f77c6276+AZXqiaARpwF4MoNOxx46kuiIRjrML0PDTm+c7BLaAMt6
+  - Origin: transparency.dev/armored-witness/firmware_transparency/ci/3
+    PublicKey: transparency.dev-aw-ftlog-ci-3+3f689522+Aa1Eifq6rRC8qiK+bya07yV1fXyP156pEMsX7CFBC6gg
