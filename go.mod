@@ -3,7 +3,7 @@ module github.com/transparency-dev/distributor
 go 1.20
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.8.0
+	cloud.google.com/go/cloudsqlconn v1.8.1
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-sql-driver/mysql v1.8.0
@@ -77,7 +77,7 @@ require (
 	golang.org/x/tools v0.16.0 // indirect
 	google.golang.org/api v0.169.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240308144416-29370a3891b7 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240311173647-c811ad7063a7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
