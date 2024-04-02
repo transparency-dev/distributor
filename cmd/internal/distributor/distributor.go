@@ -40,10 +40,13 @@ import (
 const maxSigs = 100
 
 var (
-	counterCheckpointUpdateRequests = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "distributor_update_checkpoint_request",
-		Help: "The total number of requests to update a checkpoint",
-	})
+	counterCheckpointUpdateRequests = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "distributor_update_checkpoint_request",
+			Help: "The total number of requests to update a checkpoint, partitioned by witness ID.",
+		},
+		[]string{"witness_id"},
+	)
 	counterCheckpointUpdateSuccess = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "distributor_update_checkpoint_success",
 		Help: "The total number of successful requests to update a checkpoint",
@@ -162,7 +165,7 @@ func (d *Distributor) GetCheckpointWitness(ctx context.Context, logID, witID str
 // by both the log and the witness specified, and be larger than any previous checkpoint distributed
 // for this pair.
 func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextRaw []byte) error {
-	counterCheckpointUpdateRequests.Inc()
+	counterCheckpointUpdateRequests.WithLabelValues(witID).Inc()
 
 	l, ok := d.ls[logID]
 	if !ok {
