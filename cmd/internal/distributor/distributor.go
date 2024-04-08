@@ -44,12 +44,12 @@ var (
 		Name: "distributor_update_checkpoint_request",
 		Help: "The total number of requests to update a checkpoint",
 	},
-		[]string{"witnesss"})
+		[]string{"witness"})
 	counterCheckpointUpdateSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "distributor_update_checkpoint_success",
 		Help: "The total number of successful requests to update a checkpoint",
 	},
-		[]string{"witnesss"})
+		[]string{"witness"})
 
 	counterCheckpointGetNRequests = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "distributor_get_checkpoint_n_request",
