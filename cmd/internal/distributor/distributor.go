@@ -40,14 +40,16 @@ import (
 const maxSigs = 100
 
 var (
-	counterCheckpointUpdateRequests = promauto.NewCounter(prometheus.CounterOpts{
+	counterCheckpointUpdateRequests = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "distributor_update_checkpoint_request",
 		Help: "The total number of requests to update a checkpoint",
-	})
-	counterCheckpointUpdateSuccess = promauto.NewCounter(prometheus.CounterOpts{
+	},
+		[]string{"witnesss"})
+	counterCheckpointUpdateSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "distributor_update_checkpoint_success",
 		Help: "The total number of successful requests to update a checkpoint",
-	})
+	},
+		[]string{"witnesss"})
 
 	counterCheckpointGetNRequests = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "distributor_get_checkpoint_n_request",
@@ -162,8 +164,6 @@ func (d *Distributor) GetCheckpointWitness(ctx context.Context, logID, witID str
 // by both the log and the witness specified, and be larger than any previous checkpoint distributed
 // for this pair.
 func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextRaw []byte) error {
-	counterCheckpointUpdateRequests.Inc()
-
 	l, ok := d.ls[logID]
 	if !ok {
 		return status.Errorf(codes.InvalidArgument, "unknown unknown log ID %q", logID)
@@ -172,6 +172,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 	if !ok {
 		return status.Errorf(codes.InvalidArgument, "unknown witness ID %q", witID)
 	}
+	counterCheckpointUpdateRequests.WithLabelValues(witID).Inc()
 	newCP, _, n, err := log.ParseCheckpoint(nextRaw, l.Origin, l.Verifier, wv)
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "failed to parse checkpoint: %v", err)
@@ -210,7 +211,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 				return status.Errorf(codes.Internal, "old checkpoint for tree size %d had hash %x but new one has %x", newCP.Size, oldCP.Hash, newCP.Hash)
 			}
 			// Nothing to do; checkpoint is equivalent to the old one so avoid DB writes.
-			counterCheckpointUpdateSuccess.Inc()
+			counterCheckpointUpdateSuccess.WithLabelValues(witID).Inc()
 			return nil
 		}
 	}
@@ -293,7 +294,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-	counterCheckpointUpdateSuccess.Inc()
+	counterCheckpointUpdateSuccess.WithLabelValues(witID).Inc()
 	return nil
 }
 
