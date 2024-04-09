@@ -215,7 +215,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 				return status.Errorf(codes.Internal, "old checkpoint for tree size %d had hash %x but new one has %x", newCP.Size, oldCP.Hash, newCP.Hash)
 			}
 			// Nothing to do; checkpoint is equivalent to the old one so avoid DB writes.
-			counterCheckpointUpdateSuccess.Inc()
+			counterCheckpointUpdateSuccess.WithLabelValues(witID).Inc()
 			return nil
 		}
 	}
@@ -298,7 +298,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-	counterCheckpointUpdateSuccess.Inc()
+	counterCheckpointUpdateSuccess.WithLabelValues(witID).Inc()
 	return nil
 }
 
