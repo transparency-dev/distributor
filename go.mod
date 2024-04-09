@@ -7,7 +7,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang/glog v1.2.0
+	github.com/golang/glog v1.2.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/gorilla/mux v1.8.1
@@ -16,14 +16,14 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/transparency-dev/formats v0.0.0-20231208153921-b058d7091e93
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
-	golang.org/x/mod v0.16.0
-	golang.org/x/sync v0.6.0
-	google.golang.org/grpc v1.62.1
+	golang.org/x/mod v0.17.0
+	golang.org/x/sync v0.7.0
+	google.golang.org/grpc v1.63.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	cloud.google.com/go/compute v1.23.4 // indirect
+	cloud.google.com/go/compute v1.24.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -42,7 +42,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
