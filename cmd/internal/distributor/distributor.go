@@ -47,11 +47,13 @@ var (
 		},
 		[]string{"witness_id"},
 	)
-	counterCheckpointUpdateSuccess = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "distributor_update_checkpoint_success",
-		Help: "The total number of successful requests to update a checkpoint",
-	})
-
+	counterCheckpointUpdateSuccess = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "distributor_update_checkpoint_success",
+			Help: "The total number of successful requests to update a checkpoint",
+		},
+		[]string{"witness_id"},
+	)
 	counterCheckpointGetNRequests = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "distributor_get_checkpoint_n_request",
 		Help: "The total number of requests to GetCheckpointN",
@@ -165,8 +167,6 @@ func (d *Distributor) GetCheckpointWitness(ctx context.Context, logID, witID str
 // by both the log and the witness specified, and be larger than any previous checkpoint distributed
 // for this pair.
 func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextRaw []byte) error {
-	counterCheckpointUpdateRequests.WithLabelValues(witID).Inc()
-
 	l, ok := d.ls[logID]
 	if !ok {
 		return status.Errorf(codes.InvalidArgument, "unknown unknown log ID %q", logID)
@@ -175,6 +175,8 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 	if !ok {
 		return status.Errorf(codes.InvalidArgument, "unknown witness ID %q", witID)
 	}
+	counterCheckpointUpdateRequests.WithLabelValues(witID).Inc()
+
 	newCP, _, n, err := log.ParseCheckpoint(nextRaw, l.Origin, l.Verifier, wv)
 	if err != nil {
 		return status.Errorf(codes.InvalidArgument, "failed to parse checkpoint: %v", err)
