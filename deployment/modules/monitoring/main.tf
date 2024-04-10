@@ -44,6 +44,52 @@ locals {
   duration            = "5m"
 }
 
+resource "google_monitoring_dashboard" "witness_dashboard" {
+  # Use 'map' in MQL to rename values:
+  # https://stackoverflow.com/questions/70381209/gcp-mql-rename-a-line-in-monitoring-chart
+  dashboard_json = <<-EOF
+    {
+      "displayName": "Armored Witness (${var.env})",
+      "gridLayout": {
+        "widgets": [
+          {
+            "title": "Update checkpoint success",
+            "xyChart": {
+              "dataSets": [{
+                "timeSeriesQuery": {
+                  "timeSeriesQueryLanguage": "fetch prometheus_target\n | metric 'prometheus.googleapis.com/distributor_update_checkpoint_success/counter' \n | filter (resource.namespace == 'distributor-service-${var.env}')\n | align rate(1m) \n | every 1m \n | group_by [metric.witness_id], \n [value_distributor_update_checkpoint_success_aggregate: aggregate(value.distributor_update_checkpoint_success)]\n | add [p: metric.witness_id] | map [p]"
+                },
+                "plotType": "LINE"
+              }],
+              "timeshiftDuration": "0s",
+              "yAxis": {
+                "label": "QPS",
+                "scale": "LINEAR"
+              }
+            }
+          },
+          {
+            "title": "Update checkpoint request",
+            "xyChart": {
+              "dataSets": [{
+                "timeSeriesQuery": {
+                  "timeSeriesQueryLanguage": "fetch prometheus_target\n | metric 'prometheus.googleapis.com/distributor_update_checkpoint_request/counter' \n | filter (resource.namespace == 'distributor-service-${var.env}')\n | align rate(1m) \n | every 1m \n | group_by [metric.witness_id], \n [value_distributor_update_checkpoint_request_aggregate: aggregate(value.distributor_update_checkpoint_request)]\n | add [p: metric.witness_id] | map [p]"
+                },
+                "plotType": "LINE"
+              }],
+              "timeshiftDuration": "0s",
+              "yAxis": {
+                "label": "QPS",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        ]
+      }
+    }
+    EOF
+}
+
 resource "google_monitoring_alert_policy" "receiving_updates" {
   display_name = "Receiving Updates (${var.env})"
   combiner     = "OR"
