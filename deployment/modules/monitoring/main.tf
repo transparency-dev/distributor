@@ -83,11 +83,39 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
                 "scale": "LINEAR"
               }
             }
+          },
+          {
+            "title": "Witness liveness alert chart",
+            "alertChart": {
+              "name": "${google_monitoring_alert_policy.witness_liveness.name}"
+            }
           }
         ]
       }
     }
     EOF
+}
+
+resource "google_monitoring_alert_policy" "witness_liveness" {
+  display_name = "Number of live witnesses (${var.env})"
+  combiner     = "OR"
+  conditions {
+    display_name = "Number of live witnesses < ${var.lt_num_witness_threshold}"
+    condition_monitoring_query_language {
+      query = <<-EOT
+        fetch prometheus_target
+        | metric
+            'prometheus.googleapis.com/distributor_update_checkpoint_success/counter'
+        | filter (resource.namespace == 'distributor-service-${var.env}')
+        | align rate(1m)
+        | every 1m
+        | group_by [metric.witness_id, metric.instanceId], [row_count: row_count()]
+        | group_by [metric.witness_id], [row_count_mean: mean(row_count)]
+        | lt(${var.lt_num_witness_threshold})
+      EOT
+      duration = "1800s"
+    }
+  }
 }
 
 resource "google_monitoring_alert_policy" "receiving_updates" {
