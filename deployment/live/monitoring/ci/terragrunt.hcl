@@ -6,7 +6,7 @@ include "root" {
 inputs = merge(
   include.root.locals,
   {
-    lt_num_witness_threshold = 0
+    alert_lt_num_witness_threshold = 0
   }
 )
 

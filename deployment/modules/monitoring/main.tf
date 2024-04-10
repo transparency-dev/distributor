@@ -100,7 +100,7 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
   display_name = "Number of live witnesses (${var.env})"
   combiner     = "OR"
   conditions {
-    display_name = "Number of live witnesses < ${var.lt_num_witness_threshold}"
+    display_name = "Number of live witnesses < ${var.alert_lt_num_witness_threshold}"
     condition_monitoring_query_language {
       # First group by both witness_id and instanceId, since the metric for
       # each witness is reported by multiple instances. Then, since the
@@ -115,7 +115,7 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
         | every 1m
         | group_by [metric.witness_id, metric.instanceId], [row_count: row_count()]
         | group_by [metric.witness_id], [row_count_mean: mean(row_count)]
-        | lt(${var.lt_num_witness_threshold})
+        | lt(${var.alert_lt_num_witness_threshold})
       EOT
       duration = "1800s"
     }
