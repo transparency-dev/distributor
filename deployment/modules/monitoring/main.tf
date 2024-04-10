@@ -102,6 +102,10 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
   conditions {
     display_name = "Number of live witnesses < ${var.lt_num_witness_threshold}"
     condition_monitoring_query_language {
+      # First group by both witness_id and instanceId, since the metric for
+      # each witness is reported by multiple instances. Then, since the
+      # timeseries across instances overlap, take the average. This ensures
+      # that the count for each witness is not double-counted across instances.
       query = <<-EOT
         fetch prometheus_target
         | metric
