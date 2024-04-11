@@ -3,9 +3,10 @@ terraform {
 }
 
 locals {
-  project_id  = "checkpoint-distributor"
-  region      = "us-central1"
-  env         = path_relative_to_include()
+  project_id               = "checkpoint-distributor"
+  region                   = "us-central1"
+  env                      = path_relative_to_include()
+  alert_enable_num_witness = true
 }
 
 remote_state {
