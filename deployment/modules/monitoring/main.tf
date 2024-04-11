@@ -83,11 +83,44 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
                 "scale": "LINEAR"
               }
             }
+          },
+          {
+            "title": "Witness liveness alert chart",
+            "alertChart": {
+              "name": "${google_monitoring_alert_policy.witness_liveness.name}"
+            }
           }
         ]
       }
     }
     EOF
+}
+
+resource "google_monitoring_alert_policy" "witness_liveness" {
+  enabled      = var.alert_enable_num_witness
+  display_name = "Number of live witnesses (${var.env})"
+  combiner     = "OR"
+  conditions {
+    display_name = "Number of live witnesses < ${var.alert_lt_num_witness_threshold}"
+    condition_monitoring_query_language {
+      # First group by both witness_id and instanceId, since the metric for
+      # each witness is reported by multiple instances. Then, since the
+      # timeseries across instances overlap, take the average. This ensures
+      # that the count for each witness is not double-counted across instances.
+      query = <<-EOT
+        fetch prometheus_target
+        | metric
+            'prometheus.googleapis.com/distributor_update_checkpoint_success/counter'
+        | filter (resource.namespace == 'distributor-service-${var.env}')
+        | align rate(1m)
+        | every 1m
+        | group_by [metric.witness_id, metric.instanceId], [row_count: row_count()]
+        | group_by [metric.witness_id], [row_count_mean: mean(row_count)]
+        | lt(${var.alert_lt_num_witness_threshold})
+      EOT
+      duration = "1800s"
+    }
+  }
 }
 
 resource "google_monitoring_alert_policy" "receiving_updates" {
