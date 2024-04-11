@@ -97,7 +97,7 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
 }
 
 resource "google_monitoring_alert_policy" "witness_liveness" {
-  enabled = var.alert_enable_num_witness
+  enabled      = var.alert_enable_num_witness
   display_name = "Number of live witnesses (${var.env})"
   combiner     = "OR"
   conditions {
