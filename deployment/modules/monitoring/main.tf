@@ -98,7 +98,7 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
 
 resource "google_monitoring_alert_policy" "witness_liveness" {
   enabled      = var.alert_enable_num_witness
-  display_name = "Number of live witnesses (${var.env})"
+  display_name = "Number of live witnesses (${var.env}) < ${var.alert_lt_num_witness_threshold}"
   combiner     = "OR"
   conditions {
     display_name = "Number of live witnesses < ${var.alert_lt_num_witness_threshold}"
@@ -107,6 +107,7 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
       # each witness is reported by multiple instances. Then, since the
       # timeseries across instances overlap, take the average. This ensures
       # that the count for each witness is not double-counted across instances.
+      # Finally, add all the counts together to compare against the threshold.
       query = <<-EOT
         fetch prometheus_target
         | metric
@@ -116,6 +117,7 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
         | every 1m
         | group_by [metric.witness_id, metric.instanceId], [row_count: row_count()]
         | group_by [metric.witness_id], [row_count_mean: mean(row_count)]
+        | group_by [], [value_witness_aggregate: aggregate(row_count_mean)]
         | lt(${var.alert_lt_num_witness_threshold})
       EOT
       duration = "1800s"
