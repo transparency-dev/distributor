@@ -32,4 +32,7 @@ updates:
 - package-ecosystem: docker
   directory: /cmd
   schedule:
-    interval: daily
+    interval: weekly
+  ignore:
+    versions:
+      - "> 1.22.99" # Only allow updates that are 1.22.x
