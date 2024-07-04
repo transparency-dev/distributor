@@ -1,6 +1,6 @@
 module github.com/transparency-dev/distributor
 
-go 1.20
+go 1.21.12
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.11.0
