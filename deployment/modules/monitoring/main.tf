@@ -85,6 +85,41 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
             }
           },
           {
+            "title": "Devices seen online",
+            "xyChart": {
+              "dataSets": [{
+                "timeSeriesQuery": {
+                  "prometheusQuery": "count by (witness_id) (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}]) > bool 0))"
+                },
+                "plotType": "STACKED_AREA"
+              }],
+              "timeshiftDuration": "0s",
+              "yAxis": {
+                "label": "Devices",
+                "scale": "LINEAR"
+              }
+            }
+          },
+          {
+            "title": "% online (assuming ${var.num_expected_devices} devices)",
+            "xyChart": {
+              "dataSets": [{
+                "timeSeriesQuery": {
+                  "prometheusQuery": "count by (instance_id) (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}]) > bool 0)) * 100 / ${var.num_expected_devices}"
+                },
+                "plotType": "STACKED_AREA"
+              }],
+              "thresholds": [{
+                "value": 51
+              }],
+              "timeshiftDuration": "0s",
+              "yAxis": {
+                "label": "%",
+                "scale": "LINEAR"
+              }
+            }
+          },
+          {
             "title": "Witness liveness alert chart",
             "alertChart": {
               "name": "${google_monitoring_alert_policy.witness_liveness.name}"
