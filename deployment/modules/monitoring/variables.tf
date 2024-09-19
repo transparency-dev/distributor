@@ -29,6 +29,11 @@ variable "env" {
   type        = string
 }
 
+variable "num_expected_devices" {
+  description = "Number of expected devices"
+  type        = number
+}
+
 variable "alert_lt_num_witness_threshold" {
   description = "The lower bound alert threshold for the number of live witnesses, as measured by the distributor_update_checkpoint_success Prometheus metric."
   type        = number

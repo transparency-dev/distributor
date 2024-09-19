@@ -7,6 +7,7 @@ inputs = merge(
   include.root.locals,
   {
     alert_lt_num_witness_threshold = 0
+    num_expected_devices = 5
   }
 )
 

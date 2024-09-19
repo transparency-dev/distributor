@@ -8,6 +8,7 @@ inputs = merge(
   {
     alert_lt_num_witness_threshold = 10
     alert_enable_num_witness = false
+    num_expected_devices = 15
   }
 )
 
