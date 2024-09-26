@@ -42,6 +42,10 @@ resource "google_project_service" "monitoring_api" {
 locals {
   distributor_service = "distributor-service-${var.env}"
   duration            = "5m"
+  # Calculate the threshold for majority.
+  # For odd numbers of devices, ceil(N/2) is fine, but if N is even we need to detect that and add 1:
+  majority         = ceil(var.num_expected_devices / 2) + 1 - (ceil(var.num_expected_devices / 2) - floor(var.num_expected_devices / 2))
+  majority_percent = local.majority / var.num_expected_devices * 100
 }
 
 resource "google_monitoring_dashboard" "witness_dashboard" {
@@ -93,6 +97,9 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
                 },
                 "plotType": "STACKED_AREA"
               }],
+              "thresholds": [{
+                "value": ${local.majority}
+              }],
               "timeshiftDuration": "0s",
               "yAxis": {
                 "label": "Devices",
@@ -110,7 +117,7 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
                 "plotType": "STACKED_AREA"
               }],
               "thresholds": [{
-                "value": 51
+                "value": ${local.majority_percent}
               }],
               "timeshiftDuration": "0s",
               "yAxis": {
@@ -143,7 +150,7 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
       # timeseries across instances overlap, take the average. This ensures
       # that the count for each witness is not double-counted across instances.
       # Finally, add all the counts together to compare against the threshold.
-      query = <<-EOT
+      query    = <<-EOT
         fetch prometheus_target
         | metric
             'prometheus.googleapis.com/distributor_update_checkpoint_success/counter'
