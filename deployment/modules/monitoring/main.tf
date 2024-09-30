@@ -43,8 +43,7 @@ locals {
   distributor_service = "distributor-service-${var.env}"
   duration            = "5m"
   # Calculate the threshold for majority.
-  # For odd numbers of devices, ceil(N/2) is fine, but if N is even we need to detect that and add 1:
-  majority         = ceil(var.num_expected_devices / 2) + 1 - (ceil(var.num_expected_devices / 2) - floor(var.num_expected_devices / 2))
+  majority         = ceil((1 + var.num_expected_devices) / 2)
   majority_percent = local.majority / var.num_expected_devices * 100
 }
 
