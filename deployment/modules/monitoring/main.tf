@@ -92,7 +92,7 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
             "xyChart": {
               "dataSets": [{
                 "timeSeriesQuery": {
-                  "prometheusQuery": "count by (witness_id) (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}]) > bool 0))"
+                  "prometheusQuery": "max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}])) > bool 0"
                 },
                 "plotType": "STACKED_AREA"
               }],
@@ -111,7 +111,7 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
             "xyChart": {
               "dataSets": [{
                 "timeSeriesQuery": {
-                  "prometheusQuery": "count by (instance_id) (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}]) > bool 0)) * 100 / ${var.num_expected_devices}"
+                  "prometheusQuery": "sum (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}])) > bool 0) * 100 / ${var.num_expected_devices}"
                 },
                 "plotType": "STACKED_AREA"
               }],
