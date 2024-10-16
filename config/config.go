@@ -81,7 +81,8 @@ func ParseWitnessesConfig(y []byte) (map[string]note.Verifier, error) {
 	}
 	ws := make(map[string]note.Verifier)
 	for _, w := range witCfg.Witnesses {
-		wSigV, err := f_note.NewVerifierForCosignatureV1(w)
+		// TODO(mhutchinson): Upgrade this to f_note.NewVerifierForCosignatureV1
+		wSigV, err := note.NewVerifier(w)
 		if err != nil {
 			return nil, fmt.Errorf("invalid witness public key: %v", err)
 		}
