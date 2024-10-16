@@ -42,6 +42,9 @@ resource "google_project_service" "monitoring_api" {
 locals {
   distributor_service = "distributor-service-${var.env}"
   duration            = "5m"
+  # Calculate the threshold for majority.
+  majority         = ceil((1 + var.num_expected_devices) / 2)
+  majority_percent = local.majority / var.num_expected_devices * 100
 }
 
 resource "google_monitoring_dashboard" "witness_dashboard" {
@@ -89,9 +92,12 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
             "xyChart": {
               "dataSets": [{
                 "timeSeriesQuery": {
-                  "prometheusQuery": "count by (witness_id) (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}]) > bool 0))"
+                  "prometheusQuery": "max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}])) > bool 0"
                 },
                 "plotType": "STACKED_AREA"
+              }],
+              "thresholds": [{
+                "value": ${local.majority}
               }],
               "timeshiftDuration": "0s",
               "yAxis": {
@@ -105,12 +111,12 @@ resource "google_monitoring_dashboard" "witness_dashboard" {
             "xyChart": {
               "dataSets": [{
                 "timeSeriesQuery": {
-                  "prometheusQuery": "count by (instance_id) (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}]) > bool 0)) * 100 / ${var.num_expected_devices}"
+                  "prometheusQuery": "sum (max by (instance_id, witness_id) (rate(distributor_update_checkpoint_request{configuration_name='distributor-service-${var.env}'}[$${__interval}])) > bool 0) * 100 / ${var.num_expected_devices}"
                 },
                 "plotType": "STACKED_AREA"
               }],
               "thresholds": [{
-                "value": 51
+                "value": ${local.majority_percent}
               }],
               "timeshiftDuration": "0s",
               "yAxis": {
@@ -143,7 +149,7 @@ resource "google_monitoring_alert_policy" "witness_liveness" {
       # timeseries across instances overlap, take the average. This ensures
       # that the count for each witness is not double-counted across instances.
       # Finally, add all the counts together to compare against the threshold.
-      query = <<-EOT
+      query    = <<-EOT
         fetch prometheus_target
         | metric
             'prometheus.googleapis.com/distributor_update_checkpoint_success/counter'

@@ -214,9 +214,9 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 				reportInconsistency(oldBs, nextRaw)
 				return status.Errorf(codes.Internal, "old checkpoint for tree size %d had hash %x but new one has %x", newCP.Size, oldCP.Hash, newCP.Hash)
 			}
-			// Nothing to do; checkpoint is equivalent to the old one so avoid DB writes.
-			counterCheckpointUpdateSuccess.WithLabelValues(witID).Inc()
-			return nil
+			// This used to short-circuit here to avoid writes. However, having the most recently witnessed
+			// timestamp available is beneficial to demonstrate freshness.
+			// If there are too many equivalent writes happening, then consider implementing a throttle here.
 		}
 	}
 
