@@ -2,7 +2,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "5.14.0"
+      version = "6.0.1"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = "6.0.1"
     }
   }
 }
@@ -25,8 +29,8 @@ resource "google_artifact_registry_repository" "distributor_docker" {
 }
 
 locals {
-  artifact_repo  = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
-  docker_image   = "${local.artifact_repo}/distributor"
+  artifact_repo = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
+  docker_image  = "${local.artifact_repo}/distributor"
 }
 
 resource "google_cloudbuild_trigger" "distributor_docker" {
