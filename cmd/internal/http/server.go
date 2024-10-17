@@ -93,7 +93,7 @@ func (s *Server) getCheckpointN(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to get checkpoint", httpForCode(status.Code(err)))
 		return
 	}
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	if _, err := w.Write(chkpt); err != nil {
 		glog.Errorf("w.Write(): %v", err)
 	}
@@ -112,7 +112,7 @@ func (s *Server) getCheckpointWitness(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "failed to get checkpoint", httpForCode(status.Code(err)))
 		return
 	}
-	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	if _, err := w.Write(chkpt); err != nil {
 		glog.Errorf("w.Write(): %v", err)
 	}
