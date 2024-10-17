@@ -28,7 +28,11 @@ terraform {
   backend "gcs" {}
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
+      version = "5.14.0"
+    }
+    google-beta = {
+      source  = "hashicorp/google-beta"
       version = "5.14.0"
     }
   }
@@ -108,6 +112,7 @@ module "network-safer-mysql-simple" {
 
 module "private-service-access" {
   source      = "GoogleCloudPlatform/sql-db/google//modules/private_service_access"
+  version     = "20.0.0"
   project_id  = var.project_id
   vpc_network = module.network-safer-mysql-simple.network_name
 }
@@ -119,6 +124,7 @@ locals {
 
 module "safer-mysql-db" {
   source               = "GoogleCloudPlatform/sql-db/google//modules/safer_mysql"
+  version              = "20.0.0"
   name                 = "distributor-mysql-${var.env}-instance-1"
   random_instance_name = true
   project_id           = var.project_id
@@ -191,7 +197,7 @@ resource "google_cloud_run_v2_service" "default" {
     containers {
       image = var.distributor_docker_image
       name  = "distributor"
-      args  = concat([
+      args = concat([
         "--logtostderr",
         "--v=1",
         "--use_cloud_sql",
@@ -225,9 +231,9 @@ resource "google_cloud_run_v2_service" "default" {
 
       startup_probe {
         initial_delay_seconds = 1
-        timeout_seconds = 1
-        period_seconds = 10
-        failure_threshold = 3
+        timeout_seconds       = 1
+        period_seconds        = 10
+        failure_threshold     = 3
         tcp_socket {
           port = 8080
         }
@@ -239,8 +245,8 @@ resource "google_cloud_run_v2_service" "default" {
       }
     }
     containers {
-      image = "us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.0.0"
-      name  = "collector"
+      image      = "us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.0.0"
+      name       = "collector"
       depends_on = ["distributor"]
     }
     volumes {
@@ -250,7 +256,7 @@ resource "google_cloud_run_v2_service" "default" {
       }
     }
   }
-  client     = "terraform"
+  client = "terraform"
   depends_on = [
     google_project_service.secretmanager_api,
     google_project_service.cloudrun_api,
