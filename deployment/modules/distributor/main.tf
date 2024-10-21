@@ -29,11 +29,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "5.14.0"
+      version = "6.0.1"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "5.14.0"
+      version = "6.0.1"
     }
   }
 }
@@ -101,7 +101,7 @@ locals {
 ###
 module "network-safer-mysql-simple" {
   source  = "terraform-google-modules/network/google"
-  version = "9.0.0"
+  version = "9.3.0"
 
   project_id   = var.project_id
   network_name = local.network_name
@@ -112,7 +112,7 @@ module "network-safer-mysql-simple" {
 
 module "private-service-access" {
   source      = "GoogleCloudPlatform/sql-db/google//modules/private_service_access"
-  version     = "20.0.0"
+  version     = "22.0.0"
   project_id  = var.project_id
   vpc_network = module.network-safer-mysql-simple.network_name
 }
@@ -124,7 +124,7 @@ locals {
 
 module "safer-mysql-db" {
   source               = "GoogleCloudPlatform/sql-db/google//modules/safer_mysql"
-  version              = "20.0.0"
+  version              = "22.0.0"
   name                 = "distributor-mysql-${var.env}-instance-1"
   random_instance_name = true
   project_id           = var.project_id
