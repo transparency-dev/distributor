@@ -35,6 +35,7 @@ import (
 var (
 	baseURL = flag.String("base_url", "https://api.transparency.dev", "The base URL of the distributor")
 	n       = flag.Uint("n", 2, "The desired number of witness signatures for each log")
+	witness = flag.String("witness", "", "The name of a specific witness to fetch the latest checkpoints for. If specified, --n is ignored.")
 )
 
 func main() {
@@ -58,7 +59,13 @@ func main() {
 			continue
 		}
 		fmt.Printf("Log %q (%s)\n", log.Verifier.Name(), l)
-		cp, err := d.GetCheckpointN(l, *n)
+		var cp []byte
+		var err error
+		if len(*witness) > 0 {
+			cp, err = d.GetCheckpointWitness(l, *witness)
+		} else {
+			cp, err = d.GetCheckpointN(l, *n)
+		}
 		if err != nil {
 			fmt.Printf("❌️ Could not get checkpoint.%d: %v\n", *n, err)
 			continue
