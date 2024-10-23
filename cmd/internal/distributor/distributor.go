@@ -279,7 +279,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 		}
 		// If there are no rows then that's fine, we'll allow lastTreeSize to stay at 0
 	}
-	if newCP.Size > lastTreeSize {
+	if newCP.Size >= lastTreeSize {
 		// If the new checkpoint is for a tree larger than the current checkpoint.N for this log, then
 		// we have the option of creating a new checkpoint.N for the larger tree size.
 		mergedCP, err := checkpoints.Combine(allCheckpoints, l.Verifier, note.VerifierList(witnesses...))
