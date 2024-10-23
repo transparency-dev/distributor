@@ -286,7 +286,7 @@ func (d *Distributor) Distribute(ctx context.Context, logID, witID string, nextR
 		if err != nil {
 			// This could happen because the log has variable info, such as a timestamp.
 			// Don't treat this as a critical error or the distributor can't accept the new checkpoint.
-			glog.Warning("Failed to combine %d checkpoints: %v", sigCount, err)
+			glog.Warningf("Failed to combine %d checkpoints: %v", sigCount, err)
 		} else {
 			_, err = tx.ExecContext(ctx, `REPLACE INTO merged_checkpoints (logID, sigCount, treeSize, chkpt) VALUES (?, ?, ?, ?)`, logID, sigCount, newCP.Size, mergedCP)
 			if err != nil {
