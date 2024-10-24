@@ -6,7 +6,7 @@ include "root" {
 inputs = merge(
   include.root.locals,
   {
-    distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:v0.2.0"
+    distributor_docker_image = "us-central1-docker.pkg.dev/checkpoint-distributor/distributor-docker-prod/distributor:v0.2.1"
     extra_args               = include.root.locals.witnessArgs
   }
 )
