@@ -7,7 +7,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/golang/glog v1.2.2
+	github.com/golang/glog v1.2.3
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/gorilla/mux v1.8.1
@@ -16,9 +16,9 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
-	golang.org/x/mod v0.21.0
-	golang.org/x/sync v0.8.0
-	google.golang.org/grpc v1.67.1
+	golang.org/x/mod v0.22.0
+	golang.org/x/sync v0.9.0
+	google.golang.org/grpc v1.68.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
