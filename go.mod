@@ -11,11 +11,11 @@ require (
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/golang/glog v1.2.4
 	github.com/golang/mock v1.6.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/gorilla/mux v1.8.1
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/ory/dockertest/v3 v3.11.0
-	github.com/prometheus/client_golang v1.20.5
+	github.com/prometheus/client_golang v1.21.0
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.23.0
@@ -52,7 +52,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/term v0.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -61,7 +61,7 @@ require (
 	github.com/opencontainers/runc v1.1.14 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
