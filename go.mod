@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.6
 
 require (
-	cloud.google.com/go/cloudsqlconn v1.16.0
+	cloud.google.com/go/cloudsqlconn v1.16.1
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-sql-driver/mysql v1.9.2
@@ -13,14 +13,14 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.7.0
 	github.com/gorilla/mux v1.8.1
-	github.com/mattn/go-sqlite3 v1.14.27
+	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.24.0
 	golang.org/x/sync v0.13.0
-	google.golang.org/grpc v1.71.1
+	google.golang.org/grpc v1.72.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -80,7 +80,7 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 	google.golang.org/api v0.226.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
