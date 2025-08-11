@@ -18,7 +18,7 @@ require (
 	github.com/prometheus/client_golang v1.23.0
 	github.com/transparency-dev/formats v0.0.0-20241003145927-a04dcc2a37e4
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
-	golang.org/x/mod v0.26.0
+	golang.org/x/mod v0.27.0
 	golang.org/x/sync v0.16.0
 	google.golang.org/grpc v1.74.2
 	gopkg.in/yaml.v3 v3.0.1
