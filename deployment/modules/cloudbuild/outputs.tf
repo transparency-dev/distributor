@@ -29,7 +29,12 @@ output "cloudbuild_trigger_id" {
   value       = google_cloudbuild_trigger.distributor_docker.id
 }
 
-output "docker_image" {
-  description = "The address of the docker image that will be built"
-  value       = local.docker_image
+output "distributor_docker_image" {
+  description = "The address of the distributor docker image that will be built"
+  value       = local.distributor_docker_image
+}
+
+output "witness_docker_image" {
+  description = "The address of the witness docker image that will be built"
+  value       = local.witness_docker_image
 }

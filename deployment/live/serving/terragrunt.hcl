@@ -3,9 +3,9 @@ terraform {
 }
 
 locals {
-  project_id  = "checkpoint-distributor"
-  region      = "us-central1"
-  env         = path_relative_to_include()
+  project_id    = "checkpoint-distributor"
+  region        = "us-central1"
+  env           = path_relative_to_include()
   witnesses_raw = yamldecode(file("${get_repo_root()}/config/witnesses-${local.env}.yaml"))
   witnessArgs   = [for w in local.witnesses_raw.Witnesses : "--witkey=${w}"]
 }
@@ -20,7 +20,7 @@ remote_state {
     prefix   = "${path_relative_to_include()}/terraform.tfstate"
 
     gcs_bucket_labels = {
-      name  = "terraform_state_storage"
+      name = "terraform_state_storage"
     }
   }
 }

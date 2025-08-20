@@ -29,8 +29,13 @@ variable "env" {
   type        = string
 }
 
-variable "cloud_run_service" {
-  description = "The name of the cloud run service that new images should be pushed to"
+variable "distributor_cloud_run_service" {
+  description = "The name of the cloud run service running the distributor that new distributor images should be pushed to"
+  type        = string
+}
+
+variable "witness_cloud_run_service" {
+  description = "The name of the cloud run service running the witness that new witness images should be pushed to"
   type        = string
 }
 

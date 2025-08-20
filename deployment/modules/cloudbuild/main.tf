@@ -30,7 +30,8 @@ resource "google_artifact_registry_repository" "distributor_docker" {
 
 locals {
   artifact_repo = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
-  docker_image  = "${local.artifact_repo}/distributor"
+  distributor_docker_image  = "${local.artifact_repo}/distributor"
+  witness_docker_image  = "${local.artifact_repo}/witness"
 }
 
 resource "google_cloudbuild_trigger" "distributor_docker" {
@@ -51,8 +52,8 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "build",
-        "-t", "${local.docker_image}:$SHORT_SHA",
-        "-t", "${local.docker_image}:latest",
+        "-t", "${local.distributor_docker_image}:$SHORT_SHA",
+        "-t", "${local.distributor_docker_image}:latest",
         "-f", "./cmd/Dockerfile",
         "."
       ]
@@ -62,7 +63,7 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
       args = [
         "push",
         "--all-tags",
-        local.docker_image
+        local.distributor_docker_image
       ]
     }
     # Deploy container image to Cloud Run
@@ -72,9 +73,9 @@ resource "google_cloudbuild_trigger" "distributor_docker" {
       args = [
         "run",
         "deploy",
-        var.cloud_run_service,
+        var.distributor_cloud_run_service,
         "--image",
-        "${local.docker_image}:$SHORT_SHA",
+        "${local.distributor_docker_image}:$SHORT_SHA",
         "--region",
         var.region
       ]
@@ -109,22 +110,22 @@ resource "google_cloudbuild_trigger" "distributor_docker_tag" {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "pull",
-        "${local.docker_image}:$SHORT_SHA",
+        "${local.distributor_docker_image}:$SHORT_SHA",
       ]
     }
     step {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "tag",
-        "${local.docker_image}:$SHORT_SHA",
-        "${local.docker_image}:$TAG_NAME",
+        "${local.distributor_docker_image}:$SHORT_SHA",
+        "${local.distributor_docker_image}:$TAG_NAME",
       ]
     }
     step {
       name = "gcr.io/cloud-builders/docker"
       args = [
         "push",
-        "${local.docker_image}:$TAG_NAME",
+        "${local.distributor_docker_image}:$TAG_NAME",
       ]
     }
     options {
@@ -132,6 +133,107 @@ resource "google_cloudbuild_trigger" "distributor_docker_tag" {
     }
   }
 }
+
+resource "google_cloudbuild_trigger" "witness_docker" {
+  name            = "build-witness-docker-${var.env}"
+  service_account = google_service_account.cloudbuild_service_account.id
+  location        = var.region
+
+  github {
+    owner = "transparency-dev"
+    name  = "witness"
+    push {
+      branch = "^main$"
+    }
+  }
+
+  build {
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "build",
+        "-t", "${local.witness_docker_image}:$SHORT_SHA",
+        "-t", "${local.witness_docker_image}:latest",
+        "-f", "./cmd/gcp/omniwitness/Dockerfile",
+        "."
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "push",
+        "--all-tags",
+        local.witness_docker_image
+      ]
+    }
+    # Deploy container image to Cloud Run
+    step {
+      name       = "gcr.io/google.com/cloudsdktool/cloud-sdk"
+      entrypoint = "gcloud"
+      args = [
+        "run",
+        "deploy",
+        var.witness_cloud_run_service,
+        "--image",
+        "${local.witness_docker_image}:$SHORT_SHA",
+        "--region",
+        var.region
+      ]
+    }
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
+    }
+  }
+}
+
+# When a new tag is pushed to GitHub, add that tag to the docker
+# image that was already pushed to the repo for the corresponding
+# commit hash.
+# This requires that the above step has already completed, but that
+# seems like a fair assumption given that we'd have deployed it in ci
+# before tagging it.
+resource "google_cloudbuild_trigger" "witness_docker_tag" {
+  name            = "tag-witness-docker-${var.env}"
+  service_account = google_service_account.cloudbuild_service_account.id
+  location        = var.region
+
+  github {
+    owner = "transparency-dev"
+    name  = "witness"
+    push {
+      tag = ".*"
+    }
+  }
+
+  build {
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "pull",
+        "${local.witness_docker_image}:$SHORT_SHA",
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "tag",
+        "${local.witness_docker_image}:$SHORT_SHA",
+        "${local.witness_docker_image}:$TAG_NAME",
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "push",
+        "${local.witness_docker_image}:$TAG_NAME",
+      ]
+    }
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
+    }
+  }
+}
+
 
 resource "google_service_account" "cloudbuild_service_account" {
   account_id   = "cloudbuild-${var.env}-sa"

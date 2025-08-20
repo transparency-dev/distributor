@@ -6,8 +6,9 @@ include "root" {
 inputs = merge(
   include.root.locals,
   {
-    cloud_run_service   = "distributor-service-dev"
-    slack_template_json = file("slack.json")
+    distributor_cloud_run_service = "distributor-service-dev"
+    witness_cloud_run_service     = "witness-service-dev"
+    slack_template_json           = file("slack.json")
   }
 )
 
