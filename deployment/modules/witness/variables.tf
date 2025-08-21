@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 Google LLC
+ * Copyright 2019 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 variable "project_id" {
-  description = "The project ID to host the builds in"
+  description = "The project ID to host the cluster in"
   type        = string
 }
 
 variable "region" {
-  description = "The region to host the builds in"
+  description = "The region to host the cluster in"
   type        = string
 }
 
@@ -29,19 +29,19 @@ variable "env" {
   type        = string
 }
 
-variable "distributor_cloud_run_service" {
-  description = "The name of the cloud run service running the distributor that new distributor images should be pushed to"
+variable "witness_docker_image" {
+  description = "The full image URL (path & tag) for the witness docker image to deploy"
   type        = string
 }
 
-variable "witness_cloud_run_service" {
-  description = "The name of the cloud run service running the witness that new witness images should be pushed to"
-  type        = string
+variable "extra_args" {
+  description = "Extra arguments to be provided to the witness invoked in cloud run"
+  type        = list(string)
+  default     = []
 }
 
-variable "slack_template_json" {
-  description = "Contents of the Slack template (https://cloud.google.com/build/docs/configuring-notifications/configure-slack#configuring_slack_notifications)"
-  type        = string
-  default     = ""
+variable "ephemeral" {
+  description = "Set to true if this is a CI/temporary deploy"
+  type        = bool
+  default     = false
 }
-

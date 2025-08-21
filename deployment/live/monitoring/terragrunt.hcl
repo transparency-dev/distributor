@@ -19,7 +19,7 @@ remote_state {
     prefix   = "${path_relative_to_include()}/terraform.tfstate"
 
     gcs_bucket_labels = {
-      name  = "terraform_state_storage"
+      name = "terraform_state_storage"
     }
   }
 }
