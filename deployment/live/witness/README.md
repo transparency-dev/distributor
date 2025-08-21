@@ -2,15 +2,16 @@
 
 The directories under here contain the top-level terragrunt files for the deployment environments.
 
-In all cases, before deploying for the first time, you MUST have created the witness public and
-private keys or the `terragrunt apply` will fail.
+In all cases, before deploying for the first time, you MUST have created the witness `private` key
+and stored it in Secret Manager, or the `terragrunt apply` will fail.
 
-The keys can be generated and stored in Secret Manager from a shell on machine with appropriate
-gcloud auth, e.g. CloudShell.
-The example command below will generate a public and private note key-pair, using the provided
-witness name, and will use those to create and populate the initial version of two Secret Manager
-secrets called `witness_public_XXX` and `witness_secret_XXX` respectively, where XXX is the name
-of the target deployment environment.
+> [!Note]
+> While the witness binary itself doesn't need the `public` key, *you will* in order to share it
+> with others.
+
+Below is a `bash` snippet which will generate and store both the public and private key in Secret
+Manager under secrets called `witness_public_XXX` and `witness_secret_XXX` respectively, where
+```XXX``` is the name of the target deployment environment.
 
 ```bash
 $ export TARGET="dev" # This MUST match the name of the directory you're deploying
