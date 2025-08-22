@@ -155,12 +155,12 @@ resource "google_cloud_run_v2_service" "default" {
       args = concat([
         "--logtostderr",
         "--v=1",
-        "--listen=:8090",
+        "--listen=:8080",
         "--spanner=${local.spanner_db_full}",
         "--signer_private_key_secret_name=${data.google_secret_manager_secret_version.witness_secret_data.name}"
       ], var.extra_args)
       ports {
-        container_port = 8090
+        container_port = 8080
       }
 
       startup_probe {
@@ -169,12 +169,12 @@ resource "google_cloud_run_v2_service" "default" {
         period_seconds        = 10
         failure_threshold     = 3
         tcp_socket {
-          port = 8090
+          port = 8080
         }
       }
     }
     containers {
-      image      = "us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.0.0"
+      image      = "us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.3.0"
       name       = "collector"
       depends_on = ["witness"]
     }
