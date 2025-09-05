@@ -87,7 +87,7 @@ resource "google_cloud_run_v2_service" "default" {
         "--logtostderr",
         "--v=1",
         "--metrics_listen=:8081",
-        "--loop_interval=${var.loop_interval}",
+        "--max_qps=${var.max_qps}",
       ], var.extra_args)
      ports {
         container_port = 8081

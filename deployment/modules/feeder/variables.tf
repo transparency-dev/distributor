@@ -46,9 +46,9 @@ variable "ephemeral" {
   default     = false
 }
 
-variable "loop_interval" {
-  description = "Interval between feed attempts per log witness"
-  type = string
-  default = "60s"
+variable "max_qps" {
+  description = "Max qps to send to witnesses"
+  type = number
+  default = 2.0
 }
 
