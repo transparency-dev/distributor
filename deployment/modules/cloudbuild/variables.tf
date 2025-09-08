@@ -39,6 +39,11 @@ variable "witness_cloud_run_service" {
   type        = string
 }
 
+variable "feeder_cloud_run_service" {
+  description = "The name of the cloud run service running the feeder that new feeder images should be pushed to"
+  type        = string
+}
+
 variable "slack_template_json" {
   description = "Contents of the Slack template (https://cloud.google.com/build/docs/configuring-notifications/configure-slack#configuring_slack_notifications)"
   type        = string

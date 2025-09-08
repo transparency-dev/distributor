@@ -32,6 +32,7 @@ locals {
   artifact_repo = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
   distributor_docker_image  = "${local.artifact_repo}/distributor"
   witness_docker_image  = "${local.artifact_repo}/witness"
+  feeder_docker_image  = "${local.artifact_repo}/feeder"
 }
 
 resource "google_cloudbuild_trigger" "distributor_docker" {
@@ -226,6 +227,106 @@ resource "google_cloudbuild_trigger" "witness_docker_tag" {
       args = [
         "push",
         "${local.witness_docker_image}:$TAG_NAME",
+      ]
+    }
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
+    }
+  }
+}
+
+resource "google_cloudbuild_trigger" "feeder_docker" {
+  name            = "build-feeder-docker-${var.env}"
+  service_account = google_service_account.cloudbuild_service_account.id
+  location        = var.region
+
+  github {
+    owner = "transparency-dev"
+    name  = "witness"
+    push {
+      branch = "^main$"
+    }
+  }
+
+  build {
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "build",
+        "-t", "${local.feeder_docker_image}:$SHORT_SHA",
+        "-t", "${local.feeder_docker_image}:latest",
+        "-f", "./cmd/feedwitness/Dockerfile",
+        "."
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "push",
+        "--all-tags",
+        local.feeder_docker_image
+      ]
+    }
+    # Deploy container image to Cloud Run
+    step {
+      name       = "gcr.io/google.com/cloudsdktool/cloud-sdk"
+      entrypoint = "gcloud"
+      args = [
+        "run",
+        "deploy",
+        var.feeder_cloud_run_service,
+        "--image",
+        "${local.feeder_docker_image}:$SHORT_SHA",
+        "--region",
+        var.region
+      ]
+    }
+    options {
+      logging = "CLOUD_LOGGING_ONLY"
+    }
+  }
+}
+
+# When a new tag is pushed to GitHub, add that tag to the docker
+# image that was already pushed to the repo for the corresponding
+# commit hash.
+# This requires that the above step has already completed, but that
+# seems like a fair assumption given that we'd have deployed it in ci
+# before tagging it.
+resource "google_cloudbuild_trigger" "feeder_docker_tag" {
+  name            = "tag-feeder-docker-${var.env}"
+  service_account = google_service_account.cloudbuild_service_account.id
+  location        = var.region
+
+  github {
+    owner = "transparency-dev"
+    name  = "witness"
+    push {
+      tag = ".*"
+    }
+  }
+
+  build {
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "pull",
+        "${local.feeder_docker_image}:$SHORT_SHA",
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "tag",
+        "${local.feeder_docker_image}:$SHORT_SHA",
+        "${local.feeder_docker_image}:$TAG_NAME",
+      ]
+    }
+    step {
+      name = "gcr.io/cloud-builders/docker"
+      args = [
+        "push",
+        "${local.feeder_docker_image}:$TAG_NAME",
       ]
     }
     options {

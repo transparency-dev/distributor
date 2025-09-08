@@ -38,3 +38,8 @@ output "witness_docker_image" {
   description = "The address of the witness docker image that will be built"
   value       = local.witness_docker_image
 }
+
+output "feeder_docker_image" {
+  description = "The address of the feeder docker image that will be built"
+  value       = local.feeder_docker_image
+}
