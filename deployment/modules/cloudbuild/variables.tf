@@ -37,11 +37,13 @@ variable "distributor_cloud_run_service" {
 variable "witness_cloud_run_service" {
   description = "The name of the cloud run service running the witness that new witness images should be pushed to"
   type        = string
+  default     = null
 }
 
 variable "feeder_cloud_run_service" {
   description = "The name of the cloud run service running the feeder that new feeder images should be pushed to"
   type        = string
+  default     = null
 }
 
 variable "slack_template_json" {
