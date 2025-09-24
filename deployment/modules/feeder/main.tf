@@ -86,11 +86,11 @@ resource "google_cloud_run_v2_service" "default" {
       args = concat([
         "--logtostderr",
         "--v=1",
-        "--metrics_listen=:8081",
+        "--metrics_listen=:8080",
         "--max_qps=${var.max_qps}",
       ], var.extra_args)
      ports {
-        container_port = 8081
+        container_port = 8080
       }
 
       startup_probe {
@@ -99,7 +99,7 @@ resource "google_cloud_run_v2_service" "default" {
         period_seconds        = 10
         failure_threshold     = 3
         tcp_socket {
-          port = 8081
+          port = 8080
         }
       }
 
