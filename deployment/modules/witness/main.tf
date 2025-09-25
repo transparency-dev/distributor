@@ -136,6 +136,10 @@ resource "google_project_iam_member" "iam_secret_accessor" {
   member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
 }
 
+locals {
+  public_witness_config_args = formatlist("--public_witness_config_url=%s", var.public_witness_config_urls)
+}
+
 resource "google_cloud_run_v2_service" "default" {
   name         = "witness-service-${var.env}"
   location     = var.region
@@ -158,7 +162,9 @@ resource "google_cloud_run_v2_service" "default" {
         "--listen=:8080",
         "--spanner=${local.spanner_db_full}",
         "--signer_private_key_secret_name=${data.google_secret_manager_secret_version.witness_secret_data.name}"
-      ], var.extra_args)
+        ], 
+        local.public_witness_config_args, 
+        var.extra_args)
       ports {
         container_port = 8080
       }
