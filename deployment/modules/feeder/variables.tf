@@ -48,7 +48,7 @@ variable "ephemeral" {
 
 variable "max_qps" {
   description = "Max qps to send to witnesses"
-  type = number
-  default = 2.0
+  type        = number
+  default     = 2.0
 }
 
