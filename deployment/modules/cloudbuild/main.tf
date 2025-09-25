@@ -140,6 +140,9 @@ resource "google_cloudbuild_trigger" "witness_docker" {
   service_account = google_service_account.cloudbuild_service_account.id
   location        = var.region
 
+  // Only create this trigger if the corresponding cloud run service is specified.
+  count = var.witness_cloud_run_service != null ? 1 : 0
+
   github {
     owner = "transparency-dev"
     name  = "witness"
@@ -239,6 +242,9 @@ resource "google_cloudbuild_trigger" "feeder_docker" {
   name            = "build-feeder-docker-${var.env}"
   service_account = google_service_account.cloudbuild_service_account.id
   location        = var.region
+
+  // Only create this trigger if the corresponding cloud run service is specified.
+  count = var.feeder_cloud_run_service != null ? 1 : 0
 
   github {
     owner = "transparency-dev"

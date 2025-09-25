@@ -76,6 +76,7 @@ resource "google_cloud_run_v2_service" "default" {
 
   template {
     service_account = google_service_account.cloudrun_service_account.email
+
     scaling {
       min_instance_count = 1
       max_instance_count = 1
@@ -89,8 +90,17 @@ resource "google_cloud_run_v2_service" "default" {
         "--metrics_listen=:8080",
         "--max_qps=${var.max_qps}",
       ], var.extra_args)
-     ports {
+      ports {
         container_port = 8080
+      }
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "1024Mi"
+        }
+        // Since we do background processing, flag that we need to keep our CPU alloc even in the absence of incoming requests.
+        cpu_idle = false
       }
 
       startup_probe {
@@ -102,7 +112,6 @@ resource "google_cloud_run_v2_service" "default" {
           port = 8080
         }
       }
-
     }
     containers {
       image      = "us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.3.0"
