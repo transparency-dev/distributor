@@ -45,3 +45,9 @@ variable "ephemeral" {
   type        = bool
   default     = false
 }
+
+variable "public_witness_config_urls" {
+  description = "Set to a list of URLs where public witness config files can be retrieved"
+  type        = list(string)
+  default     = []
+}
