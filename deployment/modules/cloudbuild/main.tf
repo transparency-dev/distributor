@@ -29,10 +29,10 @@ resource "google_artifact_registry_repository" "distributor_docker" {
 }
 
 locals {
-  artifact_repo = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
-  distributor_docker_image  = "${local.artifact_repo}/distributor"
-  witness_docker_image  = "${local.artifact_repo}/witness"
-  feeder_docker_image  = "${local.artifact_repo}/feeder"
+  artifact_repo            = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.distributor_docker.name}"
+  distributor_docker_image = "${local.artifact_repo}/distributor"
+  witness_docker_image     = "${local.artifact_repo}/witness"
+  feeder_docker_image      = "${local.artifact_repo}/feeder"
 }
 
 resource "google_cloudbuild_trigger" "distributor_docker" {

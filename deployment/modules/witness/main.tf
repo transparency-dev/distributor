@@ -105,36 +105,6 @@ locals {
 ###
 ### Set up Cloud Run service
 ###
-resource "google_service_account" "cloudrun_service_account" {
-  account_id   = "cloudrun-witness-${var.env}-sa"
-  display_name = "Service Account for Witness Cloud Run (${var.env})"
-}
-
-resource "google_project_iam_member" "iam_act_as" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountUser"
-  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
-}
-resource "google_project_iam_member" "iam_metrics_writer" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
-}
-resource "google_project_iam_member" "iam_spanner_client" {
-  project = var.project_id
-  role    = "roles/spanner.databaseUser"
-  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
-}
-resource "google_project_iam_member" "iam_service_agent" {
-  project = var.project_id
-  role    = "roles/run.serviceAgent"
-  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
-}
-resource "google_project_iam_member" "iam_secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.cloudrun_service_account.email}"
-}
 
 locals {
   public_witness_config_args = formatlist("--public_witness_config_url=%s", var.public_witness_config_urls)
@@ -147,7 +117,16 @@ resource "google_cloud_run_v2_service" "default" {
 
 
   template {
-    service_account = google_service_account.cloudrun_service_account.email
+    ## This Service account will be used for running the Cloud Run service which hosts the witness.
+    ## 
+    ## The service account provided here must be a member of the following roles in order to function properly:
+    ##   "roles/iam.serviceAccountUser"
+    ##   "roles/monitoring.metricWriter"
+    ##   "roles/spanner.databaseUser"
+    ##   "roles/run.serviceAgent"
+    ##   "roles/secretmanager.secretAccessor"
+    service_account = var.witness_service_account
+
     scaling {
       min_instance_count = 1
       max_instance_count = 3
@@ -162,9 +141,9 @@ resource "google_cloud_run_v2_service" "default" {
         "--listen=:8080",
         "--spanner=${local.spanner_db_full}",
         "--signer_private_key_secret_name=${data.google_secret_manager_secret_version.witness_secret_data.name}"
-        ], 
-        local.public_witness_config_args, 
-        var.extra_args)
+        ],
+        local.public_witness_config_args,
+      var.extra_args)
       ports {
         container_port = 8080
       }
@@ -190,11 +169,6 @@ resource "google_cloud_run_v2_service" "default" {
     google_project_service.secretmanager_api,
     google_project_service.cloudrun_api,
     google_project_service.spanner_api,
-    google_project_iam_member.iam_act_as,
-    google_project_iam_member.iam_metrics_writer,
-    google_project_iam_member.iam_spanner_client,
-    google_project_iam_member.iam_service_agent,
-    google_project_iam_member.iam_secret_accessor,
   ]
 
   deletion_protection = !var.ephemeral
