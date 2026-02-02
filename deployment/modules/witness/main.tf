@@ -57,11 +57,12 @@ resource "google_project_service" "cloudrun_api" {
 }
 
 data "google_secret_manager_secret" "witness_secret" {
-  secret_id = "witness_secret_${var.env}"
+  secret_id = var.witness_secret_name
 }
 
 data "google_secret_manager_secret_version" "witness_secret_data" {
-  secret = data.google_secret_manager_secret.witness_secret.id
+  secret  = data.google_secret_manager_secret.witness_secret.id
+  version = 1
 }
 
 # Update service accounts to allow secret access
