@@ -51,3 +51,13 @@ variable "public_witness_config_urls" {
   type        = list(string)
   default     = []
 }
+
+variable "witness_service_account" {
+  description = "Service account identifier to use when running the witness. Should be in email form: 'email@address'. This service will need to be a member of several IAM roles - see the main.tf for details."
+  type        = string
+}
+
+variable "witness_secret_name" {
+  description = "Secret manager secret name containing the note-formatted key to use for signing checkpoints."
+  type        = string
+}
