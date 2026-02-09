@@ -29,8 +29,13 @@ variable "env" {
   type        = string
 }
 
+variable "witness_docker_repo" {
+  description = "The full URL of the docker registry where the witness docker image can be found"
+  type        = string
+}
+
 variable "witness_docker_image" {
-  description = "The full image URL (path & tag) for the witness docker image to deploy"
+  description = "The image name and tag of the witness docker image to deploy, as found on the witness_docker_repo."
   type        = string
 }
 

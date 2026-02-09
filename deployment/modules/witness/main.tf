@@ -29,11 +29,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "6.0.1"
+      version = "7.18.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "6.0.1"
+      version = "7.18.0"
     }
   }
 }
@@ -103,6 +103,23 @@ locals {
   spanner_db_full = "projects/${var.project_id}/instances/${google_spanner_instance.witness_spanner.name}/databases/${google_spanner_database.witness_db.name}"
 }
 
+# Set up an artifact registry to cache remote images we depend on via Cloud Run, below.
+#
+# This is intended to guard against the upstream image being unavailable for some reason.
+resource "google_artifact_registry_repository" "witness" {
+  location      = var.region 
+  repository_id = "witness-remote-${var.env}"
+  description   = "Remote repository with witness docker images upstream"
+  format        = "DOCKER"
+  mode          = "REMOTE_REPOSITORY"
+  remote_repository_config {
+    description = "Pull-through cache of witness repository"
+    common_repository {
+      uri         = var.witness_docker_repo
+    }
+  }
+}
+
 ###
 ### Set up Cloud Run service
 ###
@@ -134,7 +151,8 @@ resource "google_cloud_run_v2_service" "default" {
     }
     max_instance_request_concurrency = 1000
     containers {
-      image = var.witness_docker_image
+      # Access the witness docker image via our "pull-through" cache artifcat registry.
+      image = "${google_artifact_registry_repository.witness.registry_uri}/${var.witness_docker_image}"
       name  = "witness"
       args = concat([
         "--logtostderr",
