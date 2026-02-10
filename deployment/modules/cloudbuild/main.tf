@@ -158,7 +158,7 @@ resource "google_cloudbuild_trigger" "witness_docker" {
         "build",
         "-t", "${local.witness_docker_image}:$SHORT_SHA",
         "-t", "${local.witness_docker_image}:latest",
-        "-f", "./cmd/gcp/omniwitness/Dockerfile",
+        "-f", "./cmd/omniwitness_gcp/Dockerfile",
         "."
       ]
     }
