@@ -1,6 +1,6 @@
 module github.com/transparency-dev/distributor
 
-go 1.24.11
+go 1.25.0
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.20.1
@@ -17,8 +17,8 @@ require (
 	github.com/transparency-dev/formats v0.1.0
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.33.0
-	golang.org/x/sync v0.19.0
-	google.golang.org/grpc v1.79.1
+	golang.org/x/sync v0.20.0
+	google.golang.org/grpc v1.79.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 
