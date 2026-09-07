@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/cloudsqlconn v1.25.2
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
-	github.com/go-sql-driver/mysql v1.10.0
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/golang/glog v1.2.5
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.7.0
