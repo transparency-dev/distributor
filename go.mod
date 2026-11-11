@@ -2,7 +2,7 @@ module github.com/transparency-dev/distributor
 
 go 1.26.0
 
-toolchain go1.26.10
+toolchain go1.26.11
 
 require (
 	cloud.google.com/go/cloudsqlconn v1.26.0
