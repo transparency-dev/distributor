@@ -30,6 +30,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// maxCheckpointBodyBytes bounds the size of an uploaded checkpoint. Real
+// checkpoints are a few hundred bytes; 100 KiB is a generous upper limit.
+const maxCheckpointBodyBytes = 100 << 10
+
 // Distributor persists witnessed checkpoints and allows querying of them.
 type Distributor interface {
 	// GetLogs returns a list of all log IDs the distributor is aware of, sorted
@@ -65,6 +69,7 @@ func (s *Server) update(w http.ResponseWriter, r *http.Request) {
 	v := mux.Vars(r)
 	logID := v["logid"]
 	witID := v["witid"]
+	r.Body = http.MaxBytesReader(w, r.Body, maxCheckpointBodyBytes)
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("cannot read request body: %v", err.Error()), http.StatusBadRequest)
