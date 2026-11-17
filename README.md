@@ -7,11 +7,18 @@
 
 ## Overview
 
+> [!IMPORTANT]
+> The code in this repo, and the service running it, are now deprecated and will not be further maintained.
+>
+> The design and implementation of [witnessing for tlogs](https://c2sp.org/tlog-witness) has moved on since
+> the idea behind this repo was conceived. With logs now directly requesting and _distributing_ cosignatures
+> via their published `checkpoint`s, the `distributor` implementation and service have become obsolete.
+
 The distributor is a RESTful service that makes witnessed checkpoints available.
 
 This code is designed such that anyone can easily run it, see [instruction below](#running-in-docker).
 
-There is a public good instance of the distributor running that makes available checkpoints witnessed by the [Armored Witness](https://github.com/transparency-dev/armored-witness/) production fleet.
+There ~is~ was a public good instance of the distributor running that makes available checkpoints witnessed by the [Armored Witness](https://github.com/transparency-dev/armored-witness/) production fleet.
 Below is the output of querying this distributor for all witnessed checkpoints using a client provided in this repository:
 
 ```shell
