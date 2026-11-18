@@ -115,6 +115,7 @@ module "private-service-access" {
   version     = "22.0.0"
   project_id  = var.project_id
   vpc_network = module.network-safer-mysql-simple.network_name
+  deletion_policy = "ABANDON"
 }
 
 locals {
@@ -191,6 +192,7 @@ resource "google_cloud_run_v2_service" "default" {
   name         = "distributor-service-${var.env}"
   location     = var.region
   launch_stage = "GA"
+  deletion_protection = false
 
   template {
     service_account = google_service_account.cloudrun_service_account.email
