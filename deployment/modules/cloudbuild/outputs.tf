@@ -14,32 +14,8 @@
  * limitations under the License.
  */
 
-output "artifact_registry_id" {
-  description = "The ID of the created artifact registry for distributor docker images"
-  value       = google_artifact_registry_repository.distributor_docker.id
-}
-
-output "artifact_registry_name" {
-  description = "The name of the created artifact registry for distributor docker images"
-  value       = google_artifact_registry_repository.distributor_docker.name
-}
-
-output "cloudbuild_trigger_id" {
-  description = "The ID of the created trigger for building images"
-  value       = google_cloudbuild_trigger.distributor_docker.id
-}
-
-output "distributor_docker_image" {
-  description = "The address of the distributor docker image that will be built"
-  value       = local.distributor_docker_image
-}
-
 output "witness_docker_image" {
   description = "The address of the witness docker image that will be built"
   value       = local.witness_docker_image
 }
 
-output "feeder_docker_image" {
-  description = "The address of the feeder docker image that will be built"
-  value       = local.feeder_docker_image
-}
